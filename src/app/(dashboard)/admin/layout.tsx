@@ -1,23 +1,15 @@
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { AdminTopbar } from "@/components/admin/topbar"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false} style={{ "--sidebar-width": "17rem", "--sidebar-width-icon": "4rem" } as React.CSSProperties}>
       <AdminSidebar />
-      {/* SidebarInset puro. Ele herda a largura dinâmica e "empurra" o conteúdo. */}
-      <SidebarInset className="bg-[#FAFAFA] flex flex-col min-h-screen">
+      <div className="flex flex-col flex-1 w-full min-h-screen bg-[#FAFAFA] transition-all duration-300">
         <AdminTopbar />
-        
-        <main className="flex-1 p-6 lg:p-8">
-          {children}
-        </main>
-      </SidebarInset>
+        <main className="flex-1 p-6 lg:p-10">{children}</main>
+      </div>
     </SidebarProvider>
   )
 }
