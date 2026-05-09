@@ -23,7 +23,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-// Dados estruturados: Ícones apenas no grupo pai para visual clean.
+// MESMO ARRAY DE ROTAS DA VERSÃO ANTERIOR...
 const navGroups = [
   {
     title: "Facillit", icon: Briefcase,
@@ -96,11 +96,12 @@ const navGroups = [
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+  // Usamos o state nativo para trocar o ícone/logo dinamicamente se quisermos
   const { state } = useSidebar()
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-gray-100 bg-white" {...props}>
-      {/* HEADER: Limpo e sutil */}
+    // Removida qualquer classe que force largura. Usando variant "sidebar" nativo
+    <Sidebar variant="sidebar" collapsible="icon" className="border-r border-gray-100 bg-white" {...props}>
       <SidebarHeader className="border-b border-gray-50 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -117,20 +118,19 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </SidebarMenu>
       </SidebarHeader>
 
-      {/* CONTENT: Sistema de Accordion (Collapsible) */}
       <SidebarContent className="px-2 pt-4 scrollbar-thin scrollbar-thumb-gray-100">
         <SidebarMenu className="gap-1.5">
           {navGroups.map((group) => {
-            // Verifica se alguma rota filha está ativa para deixar a sanfona aberta
             const isActiveGroup = group.items.some(item => pathname.startsWith(item.url))
             
             return (
-              <Collapsible key={group.title} asChild defaultOpen={isActiveGroup} className="group/collapsible">
-                <SidebarMenuItem>
+              // HIERARQUIA CORRIGIDA: MenuItem é o pai do Collapsible. HTML Semântico perfeito.
+              <SidebarMenuItem key={group.title}>
+                <Collapsible defaultOpen={isActiveGroup} className="group/collapsible w-full">
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton 
                       tooltip={group.title}
-                      className="font-normal text-[13px] text-gray-600 hover:text-black hover:bg-gray-50/80 data-[state=open]:text-black transition-all"
+                      className="w-full font-normal text-[13px] text-gray-600 hover:text-black hover:bg-gray-50/80 data-[state=open]:text-black transition-all"
                     >
                       <group.icon strokeWidth={1.25} />
                       <span className="tracking-wide">{group.title}</span>
@@ -138,7 +138,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   
-                  <CollapsibleContent>
+                  <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
                     <SidebarMenuSub className="border-l border-gray-100/60 ml-3.5 pl-2 mt-1 gap-1">
                       {group.items.map((item) => {
                         const isActive = pathname.startsWith(item.url)
@@ -161,14 +161,13 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                       })}
                     </SidebarMenuSub>
                   </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+                </Collapsible>
+              </SidebarMenuItem>
             )
           })}
         </SidebarMenu>
       </SidebarContent>
 
-      {/* FOOTER: Padrão Apple, Dropdown em Vidro */}
       <SidebarFooter className="border-t border-gray-50 p-3">
         <SidebarMenu>
           <SidebarMenuItem>

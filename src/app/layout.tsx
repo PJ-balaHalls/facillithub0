@@ -1,28 +1,24 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { TooltipProvider } from "@/components/ui/tooltip"; // <-- Importação adicionada
-import "./globals.css";
+import { AdminSidebar } from "@/components/admin/admin-sidebar"
+import { AdminTopbar } from "@/components/admin/topbar"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Facillit Hub OS",
-  description: "A infraestrutura digital definitiva para negócios locais.",
-};
-
-export default function RootLayout({
+export default function AdminLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="pt-BR">
-      <body className={inter.className}>
-        {/* TooltipProvider envolve toda a aplicação */}
-        <TooltipProvider>
+    <SidebarProvider>
+      <AdminSidebar />
+      {/* Removemos classes forçadas. O SidebarInset nativo já cuida de empurrar o conteúdo perfeitamente */}
+      <SidebarInset className="bg-[#FAFAFA]">
+        <AdminTopbar />
+        
+        {/* Container principal sem overflow horizontal forçado */}
+        <main className="p-4 md:p-6 lg:p-8 w-full">
           {children}
-        </TooltipProvider>
-      </body>
-    </html>
-  );
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  )
 }
