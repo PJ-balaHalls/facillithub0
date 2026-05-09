@@ -39,7 +39,7 @@ const navGroups = [
   {
     title: "Finder", icon: Compass,
     items: [
-      { title: "Buscas (Apify)", url: "/admin/finder/buscas" },
+      { title: "Buscas", url: "/admin/finder" },
       { title: "Leads Scored", url: "/admin/finder/leads" },
       { title: "Análise de IA", url: "/admin/finder/analise" },
     ],

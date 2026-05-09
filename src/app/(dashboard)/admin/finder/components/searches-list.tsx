@@ -30,6 +30,99 @@ const STATUS_CONFIG = {
   failed:     { label: 'Falhou',         color: 'text-red-600',     bg: 'bg-red-50',     border: 'border-red-100', icon: AlertCircle },
 }
 
+// ==========================================
+// COMPONENTE INTERNO: Botão de Processar IA com Modal Hacker
+// ==========================================
+function ProcessSearchButton({ searchId, disabled }: { searchId: string; disabled?: boolean }) {
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<{ logs: string[], totalLeads: number } | null>(null)
+
+  const handleProcess = async () => {
+    setLoading(true)
+    try {
+      const data = await processSearch(searchId)
+      setResult({ logs: data.logs, totalLeads: data.totalLeads })
+      toast.success("Garimpo IA finalizado com sucesso!")
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <button 
+        onClick={handleProcess} 
+        disabled={disabled || loading}
+        className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium text-purple-600
+          bg-purple-50 hover:bg-purple-100 border border-purple-100 rounded-xl transition-all disabled:opacity-50"
+      >
+        {loading ? <Loader2 className="size-3.5 animate-spin" /> : <Cpu className="size-3.5" />}
+        {loading ? 'Analisando...' : 'Processar IA'}
+      </button>
+
+      {/* MODAL DE PREVIEW DOS LOGS (TELA DE HACKER) */}
+      {result && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 text-left">
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-3xl shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3 text-emerald-600">
+                <div className="p-2 bg-emerald-50 rounded-xl">
+                  <CheckCircle2 className="size-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Garimpo Finalizado!</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">Operação processada e salva no banco de dados.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+              <p className="text-sm text-blue-800">
+                A Inteligência Artificial filtrou os resultados e identificou <strong>{result.totalLeads} oportunidades qualificadas</strong>.
+              </p>
+            </div>
+
+            {/* CONSOLE DE LOGS */}
+            <div className="bg-gray-950 rounded-2xl p-5 h-72 overflow-y-auto mb-8 font-mono text-[11px] text-emerald-400 space-y-1.5 shadow-inner">
+              {result.logs.map((log, i) => (
+                <div key={i} className={
+                  log.includes('❌') ? 'text-red-400' : 
+                  log.includes('✅') ? 'text-emerald-400 font-bold' : 
+                  log.includes('🧠') ? 'text-blue-300' :
+                  log.includes('⏭️') ? 'text-gray-500' : 'text-gray-300'
+                }>
+                  {log}
+                </div>
+              ))}
+            </div>
+
+            {/* DEEP LINK PARA O CRM */}
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setResult(null)} 
+                className="px-6 py-2.5 text-gray-500 hover:bg-gray-100 rounded-full text-sm font-medium transition-all"
+              >
+                Fechar
+              </button>
+              <Link 
+                href={`/admin/vendas/leads`} 
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#5CA3FF] hover:bg-[#4b8ce0] text-white text-sm font-medium rounded-full shadow-sm hover:shadow-md transition-all"
+              >
+                Ver Oportunidades no CRM <ArrowRight className="size-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+// ==========================================
+// EXPORTAÇÃO PRINCIPAL DO COMPONENTE DE LISTA
+// ==========================================
 interface Props { searches: Search[] }
 
 export function SearchesList({ searches }: Props) {
@@ -48,21 +141,6 @@ export function SearchesList({ searches }: Props) {
         }
       } catch (err: any) {
         toast.error("Erro ao sincronizar", { description: err.message })
-      } finally {
-        setLoadingId(null)
-      }
-    })
-  }
-
-  const handleProcess = (id: string) => {
-    setLoadingId(id)
-    startTransition(async () => {
-      try {
-        toast.info("Processamento iniciado", { description: "A IA está analisando as avaliações. Pode levar alguns minutos." })
-        await processSearch(id)
-        toast.success("Leads gerados!", { description: "Acesse a aba Leads Scored para ver os resultados." })
-      } catch (err: any) {
-        toast.error("Erro no processamento", { description: err.message })
       } finally {
         setLoadingId(null)
       }
@@ -165,17 +243,13 @@ export function SearchesList({ searches }: Props) {
                   </button>
                 )}
 
+                {/* SUBSTITUÍDO PELO NOSSO NOVO COMPONENTE DE IA */}
                 {(s.status === 'processing' || (s.status === 'running')) && (
-                  <button onClick={() => handleProcess(s.id)} disabled={isLoading}
-                    className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium text-purple-600
-                      bg-purple-50 hover:bg-purple-100 border border-purple-100 rounded-xl transition-all disabled:opacity-50">
-                    {isLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Cpu className="size-3.5" />}
-                    Processar IA
-                  </button>
+                  <ProcessSearchButton searchId={s.id} disabled={isLoading} />
                 )}
 
                 {s.status === 'completed' && (
-                  <Link href={`/admin/finder/leads?search=${s.id}`}
+                  <Link href={`/admin/vendas/leads`}
                     className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium text-[#5CA3FF]
                       bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-xl transition-all">
                     Ver Leads <ArrowRight className="size-3.5" />
