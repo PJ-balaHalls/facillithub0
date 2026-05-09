@@ -15,13 +15,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <SidebarProvider>
       <AppSidebar />
-      {/* SidebarInset adapta-se automaticamente à largura da Sidebar. Quando a Sidebar fecha (offcanvas), ele expande a 100% da largura */}
-      <SidebarInset className="bg-[#FAFAFA] min-h-screen flex flex-col w-full transition-all duration-300 ease-in-out">
-        
-        {/* A Topbar continua a ser uma pílula centralizada que lhe enviei na última resposta */}
+      <SidebarInset className="bg-background">
         <Topbar user={user} />
-        
-        <main className="flex-1 p-6 md:p-10 pt-8 mx-auto w-full max-w-7xl">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 w-full max-w-7xl mx-auto">
           {children}
         </main>
       </SidebarInset>
