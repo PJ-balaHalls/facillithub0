@@ -10,8 +10,8 @@ export default function AdminLayout({
   return (
     <SidebarProvider>
       <AdminSidebar />
-      {/* SidebarInset é quem garante que o conteúdo seja "empurrado" suavemente */}
-      <SidebarInset className="bg-[#FAFAFA] flex flex-col min-h-screen transition-all duration-300 ease-in-out">
+      {/* SidebarInset puro. Ele herda a largura dinâmica e "empurra" o conteúdo. */}
+      <SidebarInset className="bg-[#FAFAFA] flex flex-col min-h-screen">
         <AdminTopbar />
         
         <main className="flex-1 p-6 lg:p-8">

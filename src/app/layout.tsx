@@ -1,24 +1,31 @@
-import { AdminSidebar } from "@/components/admin/admin-sidebar"
-import { AdminTopbar } from "@/components/admin/topbar"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 
-export default function AdminLayout({
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+
+// 1. Importe o provedor de Tooltips do seu próprio componente UI
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Facillit Hub",
+  description: "Infraestrutura digital para negócios locais",
+};
+
+export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <SidebarProvider>
-      <AdminSidebar />
-      {/* Removemos classes forçadas. O SidebarInset nativo já cuida de empurrar o conteúdo perfeitamente */}
-      <SidebarInset className="bg-[#FAFAFA]">
-        <AdminTopbar />
-        
-        {/* Container principal sem overflow horizontal forçado */}
-        <main className="p-4 md:p-6 lg:p-8 w-full">
+    <html lang="pt-BR">
+      <body className={inter.className}>
+        {/* 2. Envolva toda a aplicação (children) com o TooltipProvider */}
+        <TooltipProvider delayDuration={150}>
           {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
-  )
+        </TooltipProvider>
+      </body>
+    </html>
+  );
 }
