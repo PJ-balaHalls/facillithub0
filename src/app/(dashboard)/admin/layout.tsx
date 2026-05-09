@@ -5,27 +5,23 @@ import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // Chamada Real ao Banco de Dados (Server-side)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Segurança extra: se não tiver usuário, chuta pro login
   if (!user) {
     redirect("/login")
   }
 
   return (
     <SidebarProvider>
-      {/* Passamos o utilizador real para a Sidebar (Footer) */}
-      <AppSidebar user={user} />
-      
-      {/* SidebarInset é a área de conteúdo que encolhe/estica automaticamente */}
-      <SidebarInset className="bg-[#FAFAFA] min-h-screen">
-        {/* Passamos o utilizador real para a Topbar */}
+      <AppSidebar />
+      {/* SidebarInset adapta-se automaticamente à largura da Sidebar. Quando a Sidebar fecha (offcanvas), ele expande a 100% da largura */}
+      <SidebarInset className="bg-[#FAFAFA] min-h-screen flex flex-col w-full transition-all duration-300 ease-in-out">
+        
+        {/* A Topbar continua a ser uma pílula centralizada que lhe enviei na última resposta */}
         <Topbar user={user} />
         
-        {/* Conteúdo da página (Overview, Clientes, etc) */}
-        <main className="p-8">
+        <main className="flex-1 p-6 md:p-10 pt-8 mx-auto w-full max-w-7xl">
           {children}
         </main>
       </SidebarInset>
