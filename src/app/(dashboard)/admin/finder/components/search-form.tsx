@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { toast } from "sonner"
-import { Search, MapPin, Settings2, Loader2, Sparkles, Plus, X } from "lucide-react"
+import { Search, MapPin, Settings2, Loader2, Sparkles, Plus, X, Timer } from "lucide-react"
 import { createSearch } from "../actions"
 
 const TERM_SUGGESTIONS = [
@@ -20,12 +20,38 @@ interface Props {
 }
 
 export function SearchForm({ onSuccess }: Props) {
-  const [open, setOpen]           = useState(false)
-  const [isPending, startTransition] = useTransition()
-  const [terms, setTerms]         = useState<string[]>([])
-  const [regions, setRegions]     = useState<string[]>([])
-  const [termInput, setTermInput] = useState("")
+  const [open, setOpen]               = useState(false)
+  const [isPending, startTransition]  = useTransition()
+  const [terms, setTerms]             = useState<string[]>([])
+  const [regions, setRegions]         = useState<string[]>([])
+  const [termInput, setTermInput]     = useState("")
   const [regionInput, setRegionInput] = useState("")
+  
+  // Estados para a barra de progresso simulada
+  const [progress, setProgress]       = useState(0)
+  const [eta, setEta]                 = useState(0)
+
+  // Dispara a animação da barra de progresso quando a requisição iniciar
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    if (isPending) {
+      setProgress(0)
+      setEta(45) // Estimativa de base
+      
+      interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 95) return 95
+          return prev + (prev < 80 ? 3 : 0.5) 
+        })
+        setEta((prev) => (prev > 0 ? prev - 1 : 0))
+      }, 1000)
+    } else {
+      setProgress(100)
+      setEta(0)
+      setTimeout(() => setProgress(0), 1000) // reseta após o sucesso
+    }
+    return () => clearInterval(interval)
+  }, [isPending])
 
   const addTerm = (val?: string) => {
     const t = (val || termInput).trim()
@@ -50,13 +76,18 @@ export function SearchForm({ onSuccess }: Props) {
     startTransition(async () => {
       try {
         const result = await createSearch(fd)
-        toast.success("Busca iniciada no Apify!", {
-          description: "O scraping está em andamento. Acompanhe o status abaixo.",
+        toast.success("Operação iniciada com sucesso!", {
+          description: "O robô já está em campo buscando oportunidades.",
         })
-        setOpen(false)
-        setTerms([])
-        setRegions([])
-        onSuccess?.(result.searchId)
+        
+        // Aguarda um pouco para mostrar a barra em 100% antes de fechar
+        setTimeout(() => {
+          setOpen(false)
+          setTerms([])
+          setRegions([])
+          onSuccess?.(result.searchId)
+        }, 800)
+
       } catch (err: any) {
         toast.error("Falha ao iniciar busca", { description: err.message })
       }
@@ -95,7 +126,37 @@ export function SearchForm({ onSuccess }: Props) {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-8 space-y-8">
+      <form onSubmit={handleSubmit} className="p-8 space-y-8 relative">
+        {/* Camada de loading bloqueando os inputs com Blur enquanto envia */}
+        {isPending && (
+          <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] flex items-center justify-center p-8 rounded-b-3xl">
+            <div className="w-full max-w-sm bg-white p-6 rounded-2xl border border-gray-100 shadow-xl space-y-4">
+              <div className="flex items-center justify-between text-sm font-semibold text-gray-800">
+                <span className="flex items-center gap-2">
+                  <Loader2 className="size-4 text-[#5CA3FF] animate-spin" />
+                  Conectando motores...
+                </span>
+                <span className="text-[#5CA3FF]">{Math.round(progress)}%</span>
+              </div>
+              
+              {/* Barra nativa em Tailwind */}
+              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#5CA3FF] transition-all duration-300 ease-out rounded-full"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
+                <span className="flex items-center gap-1.5">
+                  <Timer className="size-3.5" /> Tempo estimado
+                </span>
+                <span>{eta}s</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Nome da busca */}
         <div className="space-y-2">
           <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
@@ -104,10 +165,11 @@ export function SearchForm({ onSuccess }: Props) {
           <input
             name="name"
             required
+            disabled={isPending}
             placeholder="Ex: Clínicas SP - Mai/25"
             className="w-full h-11 px-4 bg-gray-50/50 border border-gray-100 rounded-2xl text-[14px]
               text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2
-              focus:ring-blue-100 focus:border-[#5CA3FF]/30 transition-all"
+              focus:ring-blue-100 focus:border-[#5CA3FF]/30 transition-all disabled:opacity-50"
           />
         </div>
 
@@ -123,7 +185,7 @@ export function SearchForm({ onSuccess }: Props) {
               {terms.map(t => (
                 <span key={t} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-[#5CA3FF] text-[12px] font-medium rounded-full border border-blue-100">
                   {t}
-                  <button type="button" onClick={() => setTerms(p => p.filter(x => x !== t))}>
+                  <button type="button" disabled={isPending} onClick={() => setTerms(p => p.filter(x => x !== t))}>
                     <X className="size-3" />
                   </button>
                 </span>
@@ -134,17 +196,19 @@ export function SearchForm({ onSuccess }: Props) {
           <div className="flex gap-2">
             <input
               value={termInput}
+              disabled={isPending}
               onChange={e => setTermInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTerm())}
               placeholder="Ex: clínica dentária"
               className="flex-1 h-10 px-4 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px]
                 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2
-                focus:ring-blue-100 transition-all"
+                focus:ring-blue-100 transition-all disabled:opacity-50"
             />
             <button
               type="button"
+              disabled={isPending}
               onClick={() => addTerm()}
-              className="px-4 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-[13px] font-medium transition-all"
+              className="px-4 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-[13px] font-medium transition-all disabled:opacity-50"
             >
               <Plus className="size-4" />
             </button>
@@ -152,9 +216,9 @@ export function SearchForm({ onSuccess }: Props) {
 
           <div className="flex flex-wrap gap-1.5">
             {TERM_SUGGESTIONS.filter(s => !terms.includes(s)).slice(0, 6).map(s => (
-              <button key={s} type="button" onClick={() => addTerm(s)}
+              <button key={s} type="button" disabled={isPending} onClick={() => addTerm(s)}
                 className="px-3 py-1 text-[11px] text-gray-500 border border-gray-200 rounded-full
-                  hover:border-[#5CA3FF]/40 hover:text-[#5CA3FF] hover:bg-blue-50/50 transition-all"
+                  hover:border-[#5CA3FF]/40 hover:text-[#5CA3FF] hover:bg-blue-50/50 transition-all disabled:opacity-50"
               >
                 + {s}
               </button>
@@ -175,7 +239,7 @@ export function SearchForm({ onSuccess }: Props) {
               {regions.map(r => (
                 <span key={r} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 text-[12px] font-medium rounded-full border border-emerald-100">
                   <MapPin className="size-2.5" /> {r}
-                  <button type="button" onClick={() => setRegions(p => p.filter(x => x !== r))}>
+                  <button type="button" disabled={isPending} onClick={() => setRegions(p => p.filter(x => x !== r))}>
                     <X className="size-3" />
                   </button>
                 </span>
@@ -186,24 +250,25 @@ export function SearchForm({ onSuccess }: Props) {
           <div className="flex gap-2">
             <input
               value={regionInput}
+              disabled={isPending}
               onChange={e => setRegionInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addRegion())}
               placeholder="Ex: São Paulo, SP"
               className="flex-1 h-10 px-4 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px]
                 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2
-                focus:ring-blue-100 transition-all"
+                focus:ring-blue-100 transition-all disabled:opacity-50"
             />
-            <button type="button" onClick={() => addRegion()}
-              className="px-4 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-all">
+            <button type="button" disabled={isPending} onClick={() => addRegion()}
+              className="px-4 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-all disabled:opacity-50">
               <Plus className="size-4" />
             </button>
           </div>
 
           <div className="flex flex-wrap gap-1.5">
             {REGION_SUGGESTIONS.filter(s => !regions.includes(s)).slice(0, 5).map(s => (
-              <button key={s} type="button" onClick={() => addRegion(s)}
+              <button key={s} type="button" disabled={isPending} onClick={() => addRegion(s)}
                 className="px-3 py-1 text-[11px] text-gray-500 border border-gray-200 rounded-full
-                  hover:border-emerald-400/40 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all"
+                  hover:border-emerald-400/40 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all disabled:opacity-50"
               >
                 <MapPin className="size-2.5 inline mr-1" />{s}
               </button>
@@ -218,8 +283,8 @@ export function SearchForm({ onSuccess }: Props) {
               <Settings2 className="size-3" />
               Máx. Empresas
             </label>
-            <select name="maxResults" defaultValue="50"
-              className="w-full h-10 px-3 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px] text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100">
+            <select name="maxResults" defaultValue="50" disabled={isPending}
+              className="w-full h-10 px-3 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px] text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-50">
               <option value="20">20 empresas</option>
               <option value="50">50 empresas</option>
               <option value="100">100 empresas</option>
@@ -230,8 +295,8 @@ export function SearchForm({ onSuccess }: Props) {
             <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
               Raio de Busca
             </label>
-            <select name="radiusKm" defaultValue="5"
-              className="w-full h-10 px-3 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px] text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100">
+            <select name="radiusKm" defaultValue="5" disabled={isPending}
+              className="w-full h-10 px-3 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px] text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-50">
               <option value="2">2 km</option>
               <option value="5">5 km</option>
               <option value="10">10 km</option>
@@ -243,19 +308,15 @@ export function SearchForm({ onSuccess }: Props) {
 
         {/* Actions */}
         <div className="flex gap-3 pt-2">
-          <button type="button" onClick={() => setOpen(false)}
-            className="flex-1 h-12 border border-gray-200 text-gray-600 rounded-full text-[13px] font-medium hover:bg-gray-50 transition-all">
+          <button type="button" onClick={() => setOpen(false)} disabled={isPending}
+            className="flex-1 h-12 border border-gray-200 text-gray-600 rounded-full text-[13px] font-medium hover:bg-gray-50 transition-all disabled:opacity-50">
             Cancelar
           </button>
           <button type="submit" disabled={isPending || terms.length === 0}
             className="flex-1 h-12 bg-[#5CA3FF] hover:bg-[#4b8ce0] disabled:opacity-50 disabled:cursor-not-allowed
               text-white rounded-full text-[13px] font-medium transition-all shadow-sm shadow-blue-500/20
               flex items-center justify-center gap-2">
-            {isPending ? (
-              <><Loader2 className="size-4 animate-spin" /> Iniciando Apify...</>
-            ) : (
-              <><Sparkles className="size-3.5 fill-white" /> Iniciar Garimpo</>
-            )}
+            <Sparkles className="size-3.5 fill-white" /> Iniciar Garimpo
           </button>
         </div>
       </form>

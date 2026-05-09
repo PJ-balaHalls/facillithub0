@@ -7,8 +7,9 @@ import {
   AlertTriangle, CheckCircle2, ChevronRight, Loader2
 } from "lucide-react"
 import { PAIN_LABELS } from "@/lib/ai-finder"
-import { updateLeadStatus, getCompanyReviews } from "../actions"
-import type { LeadStatus } from "../actions"
+// ✅ CORREÇÃO 1: Caminho alterado de ../actions para ./actions
+import { updateLeadStatus, getCompanyReviews } from "./actions"
+import type { LeadStatus } from "./actions"
 
 interface Lead {
   id:              string
@@ -46,6 +47,9 @@ const SEVERITY_COLORS = {
   low:    { bg: 'bg-gray-50',   border: 'border-gray-100',   text: 'text-gray-500',   dot: 'bg-gray-300' },
 }
 
+// ==========================================
+// 1. COMPONENTE MODAL (O que você já tinha)
+// ==========================================
 interface Props {
   lead:     Lead | null
   onClose:  () => void
@@ -88,14 +92,11 @@ export function LeadDetailModal({ lead, onClose, onUpdate }: Props) {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/20 backdrop-blur-[4px]" onClick={onClose} />
 
-      {/* Modal */}
       <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto
         bg-white rounded-[2rem] shadow-[0_25px_60px_rgb(0,0,0,0.12)] border border-gray-100">
 
-        {/* Header */}
         <div className="sticky top-0 z-10 flex items-start justify-between p-6 bg-white border-b border-gray-50 rounded-t-[2rem]">
           <div>
             <div className="flex items-center gap-3 mb-1">
@@ -238,6 +239,43 @@ export function LeadDetailModal({ lead, onClose, onUpdate }: Props) {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ==========================================
+// ✅ 2. COMPONENTE DA PÁGINA (A CORREÇÃO PRINCIPAL)
+// ==========================================
+export default function LeadsPage() {
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+
+  return (
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Leads e Oportunidades</h1>
+          <p className="text-sm text-gray-500 mt-1">Gerencie os potenciais clientes encontrados pelo Facillit Finder.</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm flex flex-col items-center justify-center text-center">
+        <Star className="size-8 text-gray-300 mb-3" />
+        <h3 className="text-sm font-medium text-gray-900">Nenhum lead listado na tela ainda</h3>
+        <p className="text-xs text-gray-500 mt-1 max-w-md">
+          A interface de tabela/lista de leads precisa ser montada aqui. 
+          O seu modal de detalhes (`LeadDetailModal`) está perfeito e pronto para ser chamado assim que clicarmos num lead da lista!
+        </p>
+      </div>
+
+      {/* Renderiza o modal quando houver um lead selecionado */}
+      <LeadDetailModal
+        lead={selectedLead}
+        onClose={() => setSelectedLead(null)}
+        onUpdate={() => {
+          // Aqui no futuro adicionamos a lógica para atualizar a lista
+          setSelectedLead(null)
+        }}
+      />
     </div>
   )
 }

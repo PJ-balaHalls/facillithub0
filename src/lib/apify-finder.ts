@@ -6,8 +6,8 @@
  * Documentação: https://apify.com/compass/crawler-google-places
  *
  * Variáveis de ambiente necessárias:
- *   APIFY_TOKEN            - Token da API do Apify (console.apify.com > Settings > Integrations)
- *   APIFY_MAPS_ACTOR_ID    - Opcional, padrão: compass~crawler-google-places
+ * APIFY_TOKEN            - Token da API do Apify (console.apify.com > Settings > Integrations)
+ * APIFY_MAPS_ACTOR_ID    - Opcional, padrão: compass~crawler-google-places
  */
 
 const APIFY_TOKEN   = process.env.APIFY_TOKEN!
@@ -67,8 +67,8 @@ export async function startMapsScraping(params: {
       10,
       Math.ceil(params.maxResults / Math.max(searchStringsArray.length, 1))
     ),
-    language:       'pt',
-    countryCode:    'BR',
+    language:       'pt-BR',
+    countryCode:    'br',
     includeReviews: true,
     maxReviews:     30,
     reviewsSort:    'newest',

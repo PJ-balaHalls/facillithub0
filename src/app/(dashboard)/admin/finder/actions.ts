@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { createClient }   from '@/lib/server'
 import { startMapsScraping, getRunStatus, mapApifyStatus } from '@/lib/apify-finder'
 
@@ -102,12 +103,22 @@ export async function syncSearchStatus(searchId: string) {
 
 /**
  * Dispara o processamento manual de uma busca (via API route).
+ * Atualizado com injeção de cookies para manter a sessão do usuário.
  */
 export async function processSearch(searchId: string) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  
+  // 1. Extrai os cookies da requisição atual (do usuário logado)
+  const cookieStore = await cookies()
+  const cookieString = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; ')
+
+  // 2. Repassa os cookies na chamada para a API Route
   const res = await fetch(`${siteUrl}/api/finder/process`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Cookie': cookieString // Injeção de autenticação aqui
+    },
     body:    JSON.stringify({ searchId }),
     cache:   'no-store',
   })

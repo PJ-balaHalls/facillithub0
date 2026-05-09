@@ -10,7 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/server'
 import { getRunStatus, mapApifyStatus } from '@/lib/apify-finder'
-import { processSearchResults } from '../webhook/route'
+
+// ✅ CORREÇÃO: Usando o alias absoluto do Next.js para evitar problemas de caminho no Turbopack
+import { processSearchResults } from '@/app/api/webhook/route'
 
 export const maxDuration = 300
 
