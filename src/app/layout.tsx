@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Toaster } from "sonner"
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
@@ -21,6 +22,17 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "#fafafa" },
   ],
 };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="pt-BR">
+      <body>
+        {children}
+        <Toaster position="top-right" richColors expand={false} /> {/* Adicione isto aqui */}
+      </body>
+    </html>
+  )
+}
 
 export const metadata: Metadata = {
   // Título otimizado com palavra‑chave principal e slogan
