@@ -130,7 +130,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       >
         
         <SidebarHeader className="border-b border-gray-200/40 py-5 px-6 flex flex-row items-center justify-between">
-          <img src="/images/logo/logotiopoblack.svg" alt="Facillit Hub" className="h-5 w-auto" />
+          <img src="/images/isologos/logoblack.svg" alt="Facillit Hub" className="h-5 w-auto" />
           <button onClick={toggleSidebar} className="text-gray-400 hover:text-black transition-colors bg-white/50 hover:bg-white p-1.5 rounded-xl border border-transparent hover:border-gray-200/50 shadow-sm">
             <PanelLeftClose strokeWidth={1.5} className="size-4" />
           </button>
