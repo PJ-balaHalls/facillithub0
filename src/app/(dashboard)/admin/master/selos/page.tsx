@@ -1,93 +1,54 @@
 import { Metadata } from "next"
 import { Suspense } from "react"
-import { ShieldCheck, Award, Users, ChevronDown } from "lucide-react"
 import { RegistrySection } from "./components/registry-section"
 import { LibrarySection } from "./components/library-section"
-import { StatsSection } from "./components/stats-section"
+import { AuditSection } from "./components/audit-section"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export const metadata: Metadata = {
-  title: "Selos | Master Control",
-}
+export const metadata: Metadata = { title: "Selos | Master Admin" }
 
 export default function SealsPage() {
   return (
-    <div className="flex-1 bg-white scroll-smooth overflow-x-hidden">
-      {/* ÍNDICE FIXO - CLEAN WHITE */}
-      <nav className="fixed top-0 z-50 w-full bg-white/70 backdrop-blur-xl border-b border-gray-100/50 h-16">
-        <div className="max-w-[1400px] mx-auto h-full flex items-center justify-between px-8">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white shadow-lg shadow-black/10">
-              <ShieldCheck size={16} />
-            </div>
-            <span className="text-xs font-black uppercase tracking-widest text-black">Master.Authority</span>
-          </div>
-          <div className="flex gap-10">
-            {['Overview', 'Membros', 'Biblioteca'].map((item, i) => (
-              <a 
-                key={item}
-                href={`#section-${i}`} 
-                className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-all"
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      {/* SEÇÃO 01: VISÃO GERAL (TELA CHEIA) */}
-      <section id="section-0" className="min-h-screen flex flex-col justify-center bg-white px-8 md:px-16 pt-16">
-        <div className="max-w-[1400px] mx-auto w-full space-y-12">
-          <div className="space-y-4">
-            <h1 className="text-[12vw] lg:text-[140px] font-black tracking-tighter leading-[0.8] text-black">
-              Legitimidade.
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-400 max-w-2xl font-medium">
-              O sistema operacional de confiança do Facillit Hub. Gerencie o prestígio oficial de cada membro da rede.
-            </p>
-          </div>
-          <Suspense fallback={<Skeleton className="h-40 w-full rounded-[40px]" />}>
-            <StatsSection />
-          </Suspense>
-        </div>
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-gray-200">
-          <ChevronDown size={32} />
-        </div>
+    <div className="flex flex-col w-full max-w-[1400px] mx-auto pb-32 mt-2 scroll-smooth animate-in fade-in duration-700">
+      
+      {/* HEADER LIMPO (Consistente com admin/page.tsx) */}
+      <section className="px-8 mb-12">
+        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Operação de Autoridade</h1>
+        <p className="text-[13px] font-light text-gray-500 mt-1">Validação institucional de todos os membros e empresas.</p>
       </section>
 
-      {/* SEÇÃO 02: REGISTRO DE MEMBROS (TELA CHEIA) */}
-      <section id="section-1" className="min-h-screen bg-[#FAFAFA] flex flex-col justify-center px-8 md:px-16 border-y border-gray-100">
-        <div className="max-w-[1400px] mx-auto w-full py-20">
-          <header className="mb-16 space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Registro Geral</span>
-            <h2 className="text-6xl font-black tracking-tighter text-black leading-none">Gestão de Membros</h2>
-          </header>
-          <div className="bg-white rounded-[48px] p-1 shadow-2xl shadow-black/5 overflow-hidden">
+      <div className="px-8 space-y-24">
+        <section id="membros" className="scroll-mt-10">
+          <div className="bg-white border border-gray-100 rounded-[2.5rem] overflow-hidden shadow-[0_4px_25px_rgb(0,0,0,0.03)]">
             <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
               <RegistrySection />
             </Suspense>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* SEÇÃO 03: BIBLIOTECA (TELA CHEIA) */}
-      <section id="section-2" className="min-h-screen bg-white flex flex-col justify-center px-8 md:px-16">
-        <div className="max-w-[1400px] mx-auto w-full py-20 grid lg:grid-cols-2 gap-24 items-center">
-          <div className="space-y-8">
-            <div className="w-20 h-20 bg-black rounded-[32px] flex items-center justify-center text-white shadow-2xl shadow-black/20">
-              <Award size={40} />
-            </div>
-            <h2 className="text-7xl font-black tracking-tighter text-black leading-none">
-              Biblioteca <br /> de Selos
-            </h2>
-            <p className="text-xl text-gray-400 font-medium">
-              A arquitetura de autoridade dividida em 9 camadas fundamentais de validação.
-            </p>
-          </div>
+        <hr className="border-t border-gray-100/60" />
+
+        <section id="biblioteca" className="scroll-mt-10">
+          <h2 className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest mb-6 px-1">Biblioteca Oficial</h2>
           <LibrarySection />
-        </div>
-      </section>
+        </section>
+
+        <section id="auditoria" className="scroll-mt-10">
+          <h2 className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest mb-6 px-1">Logs de Auditoria</h2>
+          <AuditSection />
+        </section>
+      </div>
+
+      {/* NAV FLUTUANTE */}
+      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]">
+        <nav className="flex items-center gap-1 p-1.5 bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-full shadow-[0_10px_30px_rgb(0,0,0,0.08)]">
+          <a href="#membros" className="px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full hover:bg-white hover:shadow-sm transition-all text-gray-400 hover:text-[#5CA3FF]">01. Membros</a>
+          <div className="w-[1px] h-4 bg-gray-200 mx-1" />
+          <a href="#biblioteca" className="px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full hover:bg-white hover:shadow-sm transition-all text-gray-400 hover:text-[#5CA3FF]">02. Biblioteca</a>
+          <div className="w-[1px] h-4 bg-gray-200 mx-1" />
+          <a href="#auditoria" className="px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-full hover:bg-white hover:shadow-sm transition-all text-gray-400 hover:text-[#5CA3FF]">03. Auditoria</a>
+        </nav>
+      </div>
     </div>
   )
 }
