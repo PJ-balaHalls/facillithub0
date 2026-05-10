@@ -3,7 +3,6 @@ import { createClient } from '@/lib/server'
 import { Suspense } from 'next'
 import { TemplatesList } from './components/templates-list'
 import { CreateTemplateModal } from './components/create-template-modal'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Layers, Plus } from 'lucide-react'
 
 export const metadata = { title: 'Templates | Facillit Lab' }
@@ -19,7 +18,6 @@ export default async function TemplatesPage() {
   return (
     <div className="flex flex-col w-full max-w-[1400px] mx-auto pb-20 mt-2 animate-in fade-in duration-700">
 
-      {/* Header */}
       <section className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -40,7 +38,6 @@ export default async function TemplatesPage() {
         </CreateTemplateModal>
       </section>
 
-      {/* Stats rápidas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {[
           { label: 'Total de Templates',  value: templates?.length ?? 0 },
@@ -55,8 +52,7 @@ export default async function TemplatesPage() {
         ))}
       </div>
 
-      {/* Lista */}
-      <Suspense fallback={<Skeleton className="h-64 w-full rounded-3xl" />}>
+      <Suspense fallback={<div className="animate-pulse bg-gray-100 h-64 w-full rounded-3xl" />}>
         <TemplatesList initialTemplates={templates ?? []} />
       </Suspense>
 

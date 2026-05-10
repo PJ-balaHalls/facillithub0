@@ -6,7 +6,7 @@ import { toggleTemplateStatus } from "../../../lab/actions"
 import type { LabTemplate } from "@/types/lab"
 import { NICHE_LABELS } from "@/types/lab"
 import { ALL_FEATURES } from "@/types/lab"
-import { ExternalLink, Github, Power, CheckCircle2, AlertCircle } from "lucide-react"
+import { ExternalLink, Power, CheckCircle2, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 
 interface Props {

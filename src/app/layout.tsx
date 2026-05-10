@@ -4,8 +4,8 @@ import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
-import { GoogleAnalytics } from "@next/third-parties/google"; // apenas GA4
-import ConditionalGTM from "@/components/ConditionalGTM"; // GTM condicional
+import { GoogleAnalytics } from "@next/third-parties/google";
+import ConditionalGTM from "@/components/ConditionalGTM";
 import "./globals.css";
 
 const inter = Inter({
@@ -15,7 +15,6 @@ const inter = Inter({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.facillithub.com.br";
-// Usando acesso por colchetes para evitar detecção de padrão de segredo pelo scanner
 const gaId = process.env["NEXT_PUBLIC_GA_ID"];
 const gtmId = process.env["NEXT_PUBLIC_GTM_ID"];
 
@@ -104,7 +103,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Dados Estruturados
 const jsonLdOrganization = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -142,15 +140,15 @@ const jsonLdSoftware = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={inter.variable}>
+    <html lang="pt-BR" className={inter.variable} suppressHydrationWarning>
       <head>
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="preconnect" href="//www.googletagmanager.com" crossOrigin="anonymous" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSoftware) }} />
+        <script id="jsonld-org" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }} />
+        <script id="jsonld-web" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }} />
+        <script id="jsonld-soft" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSoftware) }} />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <ConditionalGTM gtmId={gtmId} />
 
         {children}
