@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     "não aparece no Google", "não acharam o cardápio", "melhorar reputação no Google",
     "gerar clientes pela internet", "captar clientes localmente", "vender mais com internet",
     "como criar site para salão de beleza", "qual melhor plataforma para agendamento",
-    "cardápio online grátis", "site pronto para barbearia", "ferramenta de agendamento para clínica",
+    "cardápio online grátis", "site profissional barbearia", "ferramenta de agendamento para clínica",
     "integração whatsapp site", "melhorar avaliações no Google", "relatório de avaliações Google",
     "automatizar respostas do Google Meu Negócio", "negócio local São Paulo", "plataforma para comércio Brasil",
     "site para empresa pequena no Rio de Janeiro", "agência digital para negócio local",
@@ -149,7 +149,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSoftware) }} />
       </head>
       <body className={inter.className}>
-        {/* Correção: gtmId sendo passado para o componente tipado */}
         <ConditionalGTM gtmId={gtmId} />
 
         {children}
@@ -157,7 +156,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Toaster position="top-right" richColors expand={false} closeButton />
         <Analytics />
         <SpeedInsights />
-        <GoogleAnalytics gaId={gaId} />
+        <GoogleAnalytics gaId={gaId ?? ""} />
       </body>
     </html>
   );

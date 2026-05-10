@@ -4,7 +4,7 @@
 import { usePathname } from "next/navigation";
 
 interface ConditionalGTMProps {
-  gtmId: string;
+  gtmId?: string; // Alterado de string para string | undefined (opcional)
 }
 
 export default function ConditionalGTM({ gtmId }: ConditionalGTMProps) {
@@ -13,6 +13,7 @@ export default function ConditionalGTM({ gtmId }: ConditionalGTMProps) {
   // Define em quais rotas o GTM deve ser carregado
   const shouldLoadGTM = pathname === "/" || pathname.startsWith("/client");
 
+  // Se o ID não existir ou a rota não for permitida, não renderiza nada
   if (!shouldLoadGTM || !gtmId) return null;
 
   return (
