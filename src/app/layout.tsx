@@ -115,6 +115,7 @@ const jsonLdOrganization = {
     "https://www.instagram.com/facillithub",
     "https://www.facebook.com/facillithub",
     "https://www.linkedin.com/company/facillithub",
+    "https://wa.me/5511978689182",  
   ],
 };
 

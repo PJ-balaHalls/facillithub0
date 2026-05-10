@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0f10" />
+  <meta name="color-scheme" content="light" />
+  <meta name="description" content="Ultrapremium — restaurante de luxo com experiência gastronômica refinada, reservas online, delivery, menu autoral e atendimento impecável." />
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+  <meta name="format-detection" content="telephone=no,email=no,address=no" />
+
+  <link rel="canonical" href="https://example.com/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" /></noscript>
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Ultrapremium | Restaurante de Luxo" />
+  <meta property="og:description" content="Uma experiência gastronômica sofisticada com reservas, delivery e menu autoral." />
+  <meta property="og:url" content="https://example.com/" />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80&auto=format&fit=crop" />
+  <meta property="og:image:alt" content="Mesa de restaurante sofisticado" />
+  <meta property="og:locale" content="pt_BR" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Ultrapremium | Restaurante de Luxo" />
+  <meta name="twitter:description" content="Uma experiência gastronômica sofisticada com reservas, delivery e menu autoral." />
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80&auto=format&fit=crop" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f0f10'/%3E%3Cpath d='M18 44c8-2 12-12 14-28 2 16 6 26 14 28' stroke='%23b8860b' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
+  <title>Ultrapremium | Restaurante de Luxo</title>
+
+  <style>
+    :root {
+      /* === TIPOGRAFIA === */
+      --font-display: 'Playfair Display', serif;
+      --font-body: 'Inter', sans-serif;
+      --font-size-h1: clamp(2.5rem, 5vw, 4.5rem);
+      --font-size-h2: clamp(2rem, 4vw, 3rem);
+      --font-size-h3: clamp(1.35rem, 2vw, 1.75rem);
+      --font-size-body: 1rem;
+      --font-size-small: 0.875rem;
+
+      /* === PALETA DE CORES === */
+      --color-primary: #b8860b;
+      --color-primary-hover: #9a7209;
+      --color-primary-light: #f3e1c1;
+      --color-secondary: #1c1c1c;
+      --color-bg: #ffffff;
+      --color-bg-alt: #fdfbf7;
+      --color-text: #2c2c2c;
+      --color-text-light: #6b6b6b;
+      --color-accent: #c9a84c;
+      --color-success: #2e7d32;
+      --color-error: #c62828;
+
+      /* === ESPAÇAMENTOS E ARREDONDAMENTOS === */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 2rem;
+      --space-xl: 4rem;
+      --space-2xl: 6rem;
+      --border-radius-sm: 8px;
+      --border-radius-md: 16px;
+      --border-radius-xl: 24px;
+      --container: 1200px;
+
+      /* === SOMBRAS E ELEVAÇÕES === */
+      --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-card: 0 14px 34px rgba(0, 0, 0, 0.12);
+      --shadow-button: 0 10px 24px rgba(184, 134, 11, 0.28);
+
+      /* === BORDAS === */
+      --border-light: 1px solid #e7e2d8;
+      --border-accent: 2px solid var(--color-primary);
+
+      /* === TRANSIÇÕES === */
+      --transition-fast: 0.2s ease;
+      --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* === APLICAÇÃO VISUAL === */
+      --header-h: 84px;
+      --header-h-shrink: 68px;
+      --hero-overlay: linear-gradient(180deg, rgba(10, 10, 10, 0.55), rgba(10, 10, 10, 0.74));
+      --section-pad: clamp(4rem, 7vw, 7rem);
+      --ring: 0 0 0 3px rgba(184, 134, 11, 0.22);
+
+      /*
+      EXEMPLO DE REBRANDING — TEMA “MARINHO & AREIA”
+      --color-primary: #0f4c81;
+      --color-primary-hover: #0d3e67;
+      --color-primary-light: #dbe8f4;
+      --color-secondary: #102235;
+      --color-bg: #f7f2e8;
+      --color-bg-alt: #f0eadf;
+      --color-text: #1f2937;
+      --color-text-light: #5f6b7a;
+      --color-accent: #d8b36a;
+      */
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      font-size: var(--font-size-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      line-height: 1.6;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+    :focus-visible { outline: none; box-shadow: var(--ring); border-color: var(--color-primary); }
+
+    .skip-link {
+      position: absolute; left: -9999px; top: 0; z-index: 9999;
+      padding: 0.85rem 1rem; background: var(--color-secondary); color: #fff; border-radius: 0 0 12px 12px;
+    }
+    .skip-link:focus { left: 1rem; top: 1rem; }
+
+    .container {
+      width: min(100% - 2rem, var(--container));
+      margin: 0 auto;
+    }
+
+    .section {
+      padding: var(--section-pad) 0;
+      content-visibility: auto;
+      contain-intrinsic-size: 800px;
+    }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      text-transform: uppercase; letter-spacing: .14em; font-size: .78rem; font-weight: 800;
+      color: var(--color-primary);
+    }
+    .eyebrow::before {
+      content: ""; width: 2.2rem; height: 1px; background: var(--color-primary);
+      opacity: .9;
+    }
+
+    h1, h2, h3, h4 { margin: 0; font-family: var(--font-display); line-height: 1.05; }
+    h1 { font-size: var(--font-size-h1); letter-spacing: -0.03em; }
+    h2 { font-size: var(--font-size-h2); letter-spacing: -0.03em; }
+    h3 { font-size: var(--font-size-h3); }
+    p { margin: 0; color: var(--color-text-light); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .65rem;
+      min-height: 48px; padding: 0.85rem 1.3rem; border: 0; border-radius: 999px;
+      cursor: pointer; transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+      will-change: transform;
+      font-weight: 700;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--color-primary); color: #111; box-shadow: var(--shadow-button); }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-secondary { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.22); backdrop-filter: blur(10px); }
+    .btn-secondary:hover { background: rgba(255,255,255,.10); }
+    .btn-ghost { background: transparent; color: var(--color-text); border: var(--border-light); }
+    .btn-ghost:hover { border-color: var(--color-primary); }
+
+    /* Header */
+    .site-header {
+      position: fixed; inset: 1rem 0 auto 0; z-index: 1000;
+      transition: background var(--transition-smooth), box-shadow var(--transition-smooth), transform var(--transition-smooth), height var(--transition-smooth), border-color var(--transition-smooth);
+      height: var(--header-h);
+      background: transparent;
+      pointer-events: none;
+    }
+    .site-header.is-scrolled {
+      transform: translateY(-2px);
+    }
+
+    .header-shell {
+      width: min(calc(100% - 1rem), 1220px);
+      margin: 0 auto;
+      height: 100%;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 12px 30px rgba(0,0,0,.12);
+      pointer-events: auto;
+      transition: background var(--transition-smooth), border-color var(--transition-smooth), box-shadow var(--transition-smooth), transform var(--transition-smooth);
+    }
+
+    .site-header.is-scrolled .header-shell {
+      background: rgba(255,255,255,.96);
+      border-color: rgba(0,0,0,.06);
+      box-shadow: 0 18px 40px rgba(0,0,0,.12);
+    }
+    .header-shell .container {
+      height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand {
+      display: inline-flex; align-items: center; gap: .8rem; font-weight: 800;
+      color: #fff;
+      letter-spacing: .02em;
+    }
+    .site-header.is-scrolled .brand, .site-header.is-scrolled .nav-link { color: var(--color-secondary); }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center;
+      background: linear-gradient(145deg, rgba(184,134,11,1), rgba(201,168,76,.72));
+      color: #111; box-shadow: 0 10px 24px rgba(184,134,11,.25);
+      flex: 0 0 auto;
+    }
+    .brand-text { display: grid; line-height: 1.1; }
+    .brand-text strong { font-size: .98rem; }
+    .brand-text span { font-size: .76rem; opacity: .78; font-weight: 600; }
+
+    .nav {
+      display: flex; align-items: center; gap: .2rem;
+    }
+    .nav-list {
+      display: flex; align-items: center; gap: .2rem;
+      list-style: none; margin: 0; padding: 0;
+    }
+    .nav-link {
+      display: inline-flex; align-items: center; min-height: 44px; padding: .7rem .92rem; border-radius: 999px;
+      color: rgba(255,255,255,.92); font-weight: 600; transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+    }
+    .nav-link:hover, .nav-link[aria-current="true"] { background: rgba(184,134,11,.16); color: var(--color-primary); }
+    .nav-cta { margin-left: .35rem; }
+
+    .menu-toggle {
+      display: none; border: 0; background: rgba(255,255,255,.12); color: #fff; width: 48px; height: 48px; border-radius: 999px; cursor: pointer;
+    }
+    .site-header.is-scrolled .menu-toggle { color: var(--color-secondary); background: rgba(0,0,0,.04); }
+
+    .mobile-panel {
+      display: none;
+      position: fixed; inset: 0 0 auto 0; top: var(--header-h); background: rgba(255,255,255,.98); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0,0,0,.06); box-shadow: var(--shadow-card); transform: translateY(-6px); opacity: 0;
+      pointer-events: none; transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+      z-index: 999;
+    }
+    .mobile-panel.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .mobile-panel .container { padding: 1rem 0 1.25rem; }
+    .mobile-nav { display: grid; gap: .5rem; }
+    .mobile-nav a {
+      display: flex; align-items: center; justify-content: space-between; min-height: 48px;
+      padding: .95rem 1rem; border-radius: 16px; background: #fff; border: var(--border-light);
+      font-weight: 700;
+    }
+
+    /* Hero */
+    .hero {
+      position: relative; min-height: 100svh; display: grid; align-items: end; color: #fff;
+      padding-top: var(--header-h);
+      background:
+        var(--hero-overlay),
+        url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600&q=80&auto=format&fit=crop') center/cover no-repeat;
+    }
+    .hero .container {
+      padding: clamp(2.5rem, 5vw, 5rem) 0 clamp(3rem, 7vw, 6rem);
+    }
+    .hero-grid {
+      display: grid; gap: 2rem; align-items: end;
+      grid-template-columns: 1.12fr .88fr;
+    }
+    .hero-copy {
+      max-width: 42rem;
+      display: grid; gap: 1.2rem;
+    }
+    .hero-copy p { color: rgba(255,255,255,.84); font-size: 1.05rem; max-width: 34rem; }
+    .hero-badges {
+      display: flex; flex-wrap: wrap; gap: .6rem;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .85rem; border-radius: 999px; font-weight: 700; font-size: .86rem;
+      background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.15); backdrop-filter: blur(10px);
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: .9rem; margin-top: .4rem; }
+    .trust-row {
+      display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .trust-card {
+      padding: 1rem 1.1rem; border-radius: 18px; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(12px);
+    }
+    .trust-card strong { display: block; font-size: 1.1rem; }
+    .trust-card span { color: rgba(255,255,255,.72); font-size: .88rem; }
+
+    .hero-panel {
+      align-self: stretch;
+      border-radius: 28px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.15);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+    .hero-panel-inner { display: grid; gap: 1rem; padding: 1rem; }
+    .mini-gallery {
+      display: grid; gap: .75rem; grid-template-columns: 1.15fr .85fr;
+      grid-template-rows: 180px 180px;
+    }
+    .mini-gallery img { width: 100%; height: 100%; object-fit: cover; border-radius: 18px; }
+    .mini-gallery .tall { grid-row: span 2; min-height: 100%; }
+    .panel-info {
+      display: grid; gap: .65rem; padding: .3rem .2rem .2rem;
+    }
+    .panel-info h3 { color: #fff; }
+    .panel-info p { color: rgba(255,255,255,.76); }
+    .panel-meta { display: flex; flex-wrap: wrap; gap: .55rem; }
+    .meta-chip {
+      display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .7rem; border-radius: 999px; font-size: .82rem; font-weight: 700;
+      background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.12);
+    }
+
+    /* Sections */
+    .section-heading {
+      display: grid; gap: .8rem; max-width: 46rem; margin-bottom: 2rem;
+    }
+    .section-heading p { font-size: 1.02rem; }
+
+    .grid {
+      display: grid; gap: 1.25rem;
+    }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+
+    .card {
+      background: var(--color-bg); border: var(--border-light); border-radius: var(--border-radius-xl); overflow: hidden; box-shadow: var(--shadow-subtle);
+    }
+    .card-pad { padding: 1.35rem; }
+    .feature-card {
+      display: grid; gap: 1rem; align-content: start;
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); border-color: rgba(184,134,11,.30); }
+    .icon-box {
+      width: 54px; height: 54px; border-radius: 18px; display: grid; place-items: center;
+      background: linear-gradient(145deg, rgba(184,134,11,.14), rgba(201,168,76,.08)); color: var(--color-primary);
+    }
+
+    .menu-showcase {
+      position: relative;
+    }
+
+    .menu-carousel {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(290px, 360px);
+      gap: 1.2rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: .5rem;
+      scrollbar-width: none;
+    }
+
+    .menu-carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .menu-card {
+      position: relative;
+      display: grid;
+      gap: 0;
+      overflow: hidden;
+      scroll-snap-align: start;
+      min-height: 100%;
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+      isolation: isolate;
+    }
+
+    .menu-card::before {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 50%;
+      background: linear-gradient(to top, rgba(0,0,0,.06), transparent);
+      opacity: 0;
+      transition: opacity var(--transition-smooth);
+      z-index: 0;
+    }
+
+    .menu-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 26px 50px rgba(0,0,0,.18);
+      border-color: rgba(184,134,11,.25);
+    }
+
+    .menu-card:hover::before {
+      opacity: 1;
+    }
+
+    .menu-card .card-pad,
+    .menu-card img {
+      position: relative;
+      z-index: 1;
+    }
+    .menu-card img { height: 220px; width: 100%; object-fit: cover; }
+    .menu-card .card-pad { display: grid; gap: .9rem; }
+    .price-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .price { font-size: 1.2rem; font-weight: 800; color: var(--color-secondary); }
+    .tag-row { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .tag {
+      display: inline-flex; align-items: center; padding: .38rem .62rem; border-radius: 999px; font-size: .76rem; font-weight: 700;
+      background: var(--color-primary-light); color: #5f4700;
+    }
+
+    .split {
+      display: grid; grid-template-columns: .92fr 1.08fr; gap: 1.5rem; align-items: center;
+    }
+    .about-media { display: grid; gap: 1rem; grid-template-columns: 1.1fr .9fr; }
+    .about-media img { border-radius: 24px; height: 100%; width: 100%; object-fit: cover; }
+    .about-bullets {
+      display: grid; gap: .8rem; margin-top: 1.25rem;
+    }
+    .bullet {
+      display: flex; gap: .7rem; align-items: flex-start; padding: .9rem 1rem; border-radius: 18px; background: var(--color-bg-alt); border: var(--border-light);
+    }
+    .bullet svg { flex: 0 0 auto; color: var(--color-primary); margin-top: .15rem; }
+
+    .reservation-form {
+      display: grid; gap: .9rem;
+    }
+    .field-grid { display: grid; gap: .9rem; grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .field { display: grid; gap: .4rem; }
+    label { font-size: .92rem; font-weight: 700; color: var(--color-secondary); }
+    input, select, textarea {
+      width: 100%; padding: .95rem 1rem; border-radius: 16px; border: var(--border-light); background: #fff; color: var(--color-text); transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    textarea { min-height: 130px; resize: vertical; }
+    .form-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+    .form-note { font-size: .88rem; color: var(--color-text-light); }
+
+    .testimonial {
+      display: grid; gap: 1rem;
+      padding: 1.35rem;
+    }
+    .quote { font-size: 1rem; color: var(--color-secondary); }
+    .reviewer { display: flex; gap: .85rem; align-items: center; }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-primary-light);
+    }
+    .reviewer strong { display: block; }
+    .stars { color: var(--color-primary); letter-spacing: .07em; }
+
+    .gallery {
+      display: grid; gap: 1rem; grid-template-columns: 1.2fr .8fr .8fr;
+      grid-auto-rows: 220px;
+    }
+    .gallery img {
+      width: 100%; height: 100%; object-fit: cover; border-radius: 24px; box-shadow: var(--shadow-subtle);
+    }
+    .gallery .wide { grid-row: span 2; }
+
+    .contact-grid { display: grid; gap: 1rem; grid-template-columns: 1fr .95fr; }
+    .contact-card { display: grid; gap: 1rem; }
+    .contact-list { display: grid; gap: .75rem; }
+    .contact-item {
+      display: flex; gap: .8rem; align-items: flex-start; padding: .95rem 1rem; border-radius: 18px; border: var(--border-light); background: #fff;
+    }
+    .contact-item svg { color: var(--color-primary); flex: 0 0 auto; margin-top: .1rem; }
+    .map {
+      min-height: 100%; overflow: hidden; border-radius: 28px; border: var(--border-light); background: var(--color-bg-alt);
+      position: relative;
+    }
+    .map iframe { width: 100%; height: 100%; min-height: 420px; border: 0; }
+
+    .faq { display: grid; gap: .8rem; }
+    details {
+      background: #fff; border: var(--border-light); border-radius: 18px; padding: 1rem 1.1rem;
+      box-shadow: var(--shadow-subtle);
+    }
+    summary {
+      cursor: pointer; font-weight: 800; color: var(--color-secondary);
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    details p { margin-top: .8rem; }
+
+    .cta-band {
+      background: linear-gradient(135deg, #101010, #1b1b1b 42%, #2d250e);
+      color: #fff;
+      border-radius: 36px;
+      padding: clamp(2rem, 5vw, 3.5rem);
+      box-shadow: var(--shadow-card);
+      display: grid; gap: 1.25rem;
+      grid-template-columns: 1.1fr .9fr;
+      align-items: center;
+    }
+    .cta-band p { color: rgba(255,255,255,.76); }
+    .cta-actions { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: flex-end; }
+
+    footer {
+      background: var(--color-secondary); color: rgba(255,255,255,.82);
+      padding: 2rem 0;
+    }
+    .footer-grid {
+      display: grid; gap: 1.25rem; grid-template-columns: 1.2fr .8fr .8fr;
+      align-items: start;
+    }
+    .footer-grid a:hover { color: var(--color-primary); }
+    .socials { display: flex; flex-wrap: wrap; gap: .65rem; }
+    .socials a {
+      width: 42px; height: 42px; border-radius: 999px; display: grid; place-items: center;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.10);
+    }
+    .copyright {
+      margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1px solid rgba(255,255,255,.09);
+      font-size: .9rem; color: rgba(255,255,255,.6);
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(22px);
+      transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1);
+      will-change: transform, opacity;
+    }
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+
+    .sr-only {
+      position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid, .split, .contact-grid, .cta-band, .footer-grid { grid-template-columns: 1fr; }
+      .cta-actions { justify-content: flex-start; }
+      .gallery { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .gallery .wide { grid-row: auto; }
+    }
+
+    @media (max-width: 860px) {
+      .nav { display: none; }
+      .menu-toggle { display: inline-grid; place-items: center; }
+      .mobile-panel { display: block; }
+      .trust-row, .grid-3, .grid-2, .field-grid, .about-media, .mini-gallery { grid-template-columns: 1fr; }
+      .mini-gallery { grid-template-rows: repeat(3, 180px); }
+      .hero { min-height: auto; }
+      .hero-panel { margin-top: .5rem; }
+      .gallery { grid-template-columns: 1fr; grid-auto-rows: 230px; }
+      .site-header .container { gap: .6rem; }
+    }
+
+    @media (max-width: 480px) {
+      :root { --section-pad: 3.5rem; }
+      .container { width: min(100% - 1.1rem, var(--container)); }
+      .hero-copy p, .section-heading p { font-size: .98rem; }
+      .btn { width: 100%; }
+      .hero-actions, .cta-actions, .form-actions { display: grid; }
+      .trust-row { gap: .75rem; }
+      .brand-text span { display: none; }
+      .hero .container { padding-top: 2.2rem; }
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "Ultrapremium",
+    "description": "Restaurante de luxo com menu autoral, reservas, delivery e experiências gastronômicas premium.",
+    "servesCuisine": ["Gourmet", "Contemporânea", "Internacional"],
+    "priceRange": "$$$$",
+    "telephone": "+55-11-99999-9999",
+    "email": "contato@ultrapremium.com.br",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Av. das Orquídeas, 1000",
+      "addressLocality": "São Paulo",
+      "addressRegion": "SP",
+      "addressCountry": "BR"
+    },
+    "openingHoursSpecification": [
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday"], "opens": "12:00", "closes": "23:00" },
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Friday", "Saturday"], "opens": "12:00", "closes": "00:00" },
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Sunday"], "opens": "12:00", "closes": "22:00" }
+    ],
+    "sameAs": [
+      "https://instagram.com/ultrapremium",
+      "https://facebook.com/ultrapremium",
+      "https://tiktok.com/@ultrapremium"
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo principal</a>
+
+  <header class="site-header" id="siteHeader">
+    <div class="header-shell">
+    <div class="container">
+      <a class="brand" href="#inicio" aria-label="Ultrapremium, voltar ao início">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text">
+          <strong>Ultrapremium</strong>
+          <span>Fine dining experience</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Navegação principal">
+        <ul class="nav-list">
+          <li><a class="nav-link" href="#sobre">Sobre nós</a></li>
+          <li><a class="nav-link" href="#cardapio">Cardápio</a></li>
+          <li><a class="nav-link" href="#reservas">Reservas</a></li>
+          <li><a class="nav-link" href="#delivery">Delivery</a></li>
+          <li><a class="nav-link" href="#localizacao">Localização</a></li>
+          <li><a class="nav-link" href="#contato">Contato</a></li>
+          <li><a class="nav-link" href="#redes-sociais">Redes sociais</a></li>
+        </ul>
+        <a class="btn btn-primary nav-cta" href="#reservas">Reservar agora</a>
+      </nav>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobilePanel">
+        ☰
+      </button>
+    </div>
+    </div>
+
+    <div class="mobile-panel" id="mobilePanel" aria-label="Menu mobile">
+      <div class="container">
+        <nav class="mobile-nav">
+          <a href="#sobre">Sobre nós <span>→</span></a>
+          <a href="#cardapio">Cardápio <span>→</span></a>
+          <a href="#reservas">Reservas <span>→</span></a>
+          <a href="#delivery">Delivery <span>→</span></a>
+          <a href="#localizacao">Localização <span>→</span></a>
+          <a href="#contato">Contato <span>→</span></a>
+          <a href="#redes-sociais">Redes sociais <span>→</span></a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="hero" id="inicio" aria-label="Apresentação principal">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-copy reveal">
+            <div class="hero-badges" aria-label="Diferenciais do restaurante">
+              <span class="badge">⭐ 4,9/5 avaliação</span>
+              <span class="badge">🍷 Carta premium</span>
+              <span class="badge">🕯️ Experiência exclusiva</span>
+            </div>
+
+            <span class="eyebrow">Restaurante de luxo</span>
+            <h1>Uma experiência gastronômica pensada para converter desejo em reserva.</h1>
+            <p>O Ultrapremium é um template white-label para restaurantes que precisam de presença sofisticada, SEO técnico forte e chamadas para ação desenhadas para reserva, delivery e contato imediato.</p>
+
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#reservas">Fazer reserva</a>
+              <a class="btn btn-secondary" href="#cardapio">Ver cardápio</a>
+            </div>
+
+            <div class="trust-row" aria-label="Provas de confiança">
+              <div class="trust-card">
+                <strong>+8 mil</strong>
+                <span>clientes atendidos</span>
+              </div>
+              <div class="trust-card">
+                <strong>15 min</strong>
+                <span>resposta média</span>
+              </div>
+              <div class="trust-card">
+                <strong>100%</strong>
+                <span>otimizado para mobile</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="hero-panel reveal" aria-label="Destaques visuais do restaurante">
+            <div class="hero-panel-inner">
+              <div class="mini-gallery">
+                <img class="tall" src="https://images.unsplash.com/photo-1547592180-85f173990554?w=900&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=80&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1547592180-85f173990554?w=900&q=80&auto=format&fit=crop 900w, https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&q=80&auto=format&fit=crop 1200w" sizes="(max-width: 860px) 100vw, 30vw" alt="Salão sofisticado do restaurante" loading="eager" />
+                <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&q=80&auto=format&fit=crop 500w, https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&q=80&auto=format&fit=crop 700w, https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1000&q=80&auto=format&fit=crop 1000w" sizes="(max-width: 860px) 100vw, 15vw" alt="Prato autoral refinado" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=700&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=500&q=80&auto=format&fit=crop 500w, https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=700&q=80&auto=format&fit=crop 700w, https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1000&q=80&auto=format&fit=crop 1000w" sizes="(max-width: 860px) 100vw, 15vw" alt="Chef preparando prato premium" loading="lazy" />
+              </div>
+
+              <div class="panel-info">
+                <h3>Menu autoral, ambiente icônico e jornada de conversão integrada.</h3>
+                <p>Reservas, localização, redes sociais e delivery ficam visíveis em pontos estratégicos para acelerar a decisão do visitante.</p>
+                <div class="panel-meta">
+                  <span class="meta-chip">📍 Jardins, SP</span>
+                  <span class="meta-chip">🕒 Seg–Dom</span>
+                  <span class="meta-chip">🚚 Delivery premium</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sobre" aria-label="Sobre nós">
+      <div class="container split reveal">
+        <div>
+          <span class="eyebrow">Sobre nós</span>
+          <div class="section-heading">
+            <h2>Uma marca criada para parecer exclusiva, confiável e irresistível.</h2>
+            <p>Este template foi desenhado para restaurantes que precisam de uma base reutilizável: basta trocar os tokens e o conteúdo para lançar uma nova marca sem refazer a experiência do zero.</p>
+          </div>
+
+          <div class="about-bullets">
+            <div class="bullet">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div><strong>Posicionamento premium.</strong> <p>Visual de alto padrão com contraste, respiro e tipografia elegante.</p></div>
+            </div>
+            <div class="bullet">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div><strong>Conversão forte.</strong> <p>CTAs recorrentes, prova social, cardápios objetivos e formulário curto.</p></div>
+            </div>
+            <div class="bullet">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div><strong>White-label real.</strong> <p>Os tokens controlam as cores, espaçamentos, sombras, fontes e comportamento.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-media" aria-label="Imagens da experiência gastronômica">
+          <img class="reveal" src="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=900&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1551218808-94e220e084d2?w=600&q=80&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1551218808-94e220e084d2?w=900&q=80&auto=format&fit=crop 900w, https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1200&q=80&auto=format&fit=crop 1200w" sizes="(max-width: 860px) 100vw, 50vw" alt="Mesa elegante com pratos e taças" loading="lazy" />
+          <img class="reveal" src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=500&q=80&auto=format&fit=crop 500w, https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80&auto=format&fit=crop 800w, https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1100&q=80&auto=format&fit=crop 1100w" sizes="(max-width: 860px) 100vw, 50vw" alt="Chef finalizando prato com precisão" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="cardapio" aria-label="Cardápio">
+      <div class="container">
+        <div class="section-heading reveal">
+          <span class="eyebrow">Cardápio</span>
+          <h2>Seleção autoral com alto valor percebido.</h2>
+          <p>Os nomes, preços e categorias podem ser trocados facilmente para adaptar o template a qualquer cozinha, do fine dining ao casual premium.</p>
+        </div>
+
+        <div class="menu-showcase reveal">
+          <div class="menu-carousel" id="menuCarousel">
+            <article class="card menu-card">
+              <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=900&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1544025162-d76694265947?w=900&q=80&auto=format&fit=crop 900w, https://images.unsplash.com/photo-1544025162-d76694265947?w=1200&q=80&auto=format&fit=crop 1200w" sizes="(max-width: 860px) 100vw, 33vw" alt="Entrada sofisticada" loading="lazy" />
+              <div class="card-pad">
+                <div class="tag-row"><span class="tag">Entrada</span><span class="tag">Chef selection</span></div>
+                <div class="price-row"><h3>Carpaccio Imperial</h3><span class="price">R$ 68</span></div>
+                <p>Lâminas nobres, azeite trufado e finalização artesanal.</p>
+                <div class="hero-actions" style="margin-top:.4rem;">
+                  <button class="btn btn-primary">Adicionar pedido</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card menu-card">
+              <img src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=900&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=600&q=80&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=900&q=80&auto=format&fit=crop 900w, https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=1200&q=80&auto=format&fit=crop 1200w" sizes="(max-width: 860px) 100vw, 33vw" alt="Risoto sofisticado" loading="lazy" />
+              <div class="card-pad">
+                <div class="tag-row"><span class="tag">Principal</span><span class="tag">Mais pedido</span></div>
+                <div class="price-row"><h3>Risoto de Ouro</h3><span class="price">R$ 94</span></div>
+                <p>Textura cremosa, redução intensa e apresentação refinada.</p>
+                <div class="hero-actions" style="margin-top:.4rem;">
+                  <button class="btn btn-primary">Adicionar pedido</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card menu-card">
+              <img src="https://images.unsplash.com/photo-1481931098730-318b6f776db0?w=900&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1481931098730-318b6f776db0?w=600&q=80&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1481931098730-318b6f776db0?w=900&q=80&auto=format&fit=crop 900w, https://images.unsplash.com/photo-1481931098730-318b6f776db0?w=1200&q=80&auto=format&fit=crop 1200w" sizes="(max-width: 860px) 100vw, 33vw" alt="Sobremesa premium" loading="lazy" />
+              <div class="card-pad">
+                <div class="tag-row"><span class="tag">Sobremesa</span><span class="tag">Premium</span></div>
+                <div class="price-row"><h3>Mil-folhas Royale</h3><span class="price">R$ 42</span></div>
+                <p>Camadas crocantes, creme leve e acabamento delicado.</p>
+                <div class="hero-actions" style="margin-top:.4rem;">
+                  <button class="btn btn-primary">Adicionar pedido</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="card menu-card">
+              <img src="https://images.unsplash.com/photo-1529042410759-befb1204b468?w=900&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1529042410759-befb1204b468?w=600&q=80&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1529042410759-befb1204b468?w=900&q=80&auto=format&fit=crop 900w, https://images.unsplash.com/photo-1529042410759-befb1204b468?w=1200&q=80&auto=format&fit=crop 1200w" sizes="(max-width: 860px) 100vw, 33vw" alt="Drink premium" loading="lazy" />
+              <div class="card-pad">
+                <div class="tag-row"><span class="tag">Drinks</span><span class="tag">Exclusivo</span></div>
+                <div class="price-row"><h3>Golden Negroni</h3><span class="price">R$ 39</span></div>
+                <p>Blend aromático com notas cítricas e acabamento sofisticado.</p>
+                <div class="hero-actions" style="margin-top:.4rem;">
+                  <button class="btn btn-primary">Adicionar pedido</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reservas" aria-label="Reservas">
+      <div class="container split reveal">
+        <div>
+          <span class="eyebrow">Reservas</span>
+          <div class="section-heading">
+            <h2>Converta curiosos em clientes com um fluxo de reserva direto.</h2>
+            <p>O formulário foi pensado para reduzir fricção: poucas perguntas, promessa clara e botão de ação de alto contraste.</p>
+          </div>
+
+          <form class="reservation-form card card-pad" id="reservationForm">
+            <div class="field-grid">
+              <div class="field">
+                <label for="name">Nome</label>
+                <input id="name" name="name" type="text" placeholder="Seu nome" autocomplete="name" required />
+              </div>
+              <div class="field">
+                <label for="phone">Telefone / WhatsApp</label>
+                <input id="phone" name="phone" type="tel" placeholder="(11) 99999-9999" autocomplete="tel" required />
+              </div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="date">Data</label>
+                <input id="date" name="date" type="date" required />
+              </div>
+              <div class="field">
+                <label for="time">Horário</label>
+                <select id="time" name="time" required>
+                  <option value="">Selecione</option>
+                  <option>12:00</option><option>13:00</option><option>19:00</option><option>20:00</option><option>21:00</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="guests">Número de pessoas</label>
+                <select id="guests" name="guests" required>
+                  <option value="">Selecione</option>
+                  <option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="occasion">Ocasião</label>
+                <select id="occasion" name="occasion">
+                  <option>Jantar romântico</option>
+                  <option>Aniversário</option>
+                  <option>Negócios</option>
+                  <option>Família</option>
+                  <option>Outro</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="notes">Observações</label>
+              <textarea id="notes" name="notes" placeholder="Preferências, restrições alimentares, pedidos especiais..."></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Enviar reserva</button>
+              <span class="form-note" id="formFeedback" aria-live="polite">Resposta rápida via WhatsApp ou e-mail.</span>
+            </div>
+          </form>
+        </div>
+
+        <div class="card card-pad reveal">
+          <span class="eyebrow">Prova social</span>
+          <div class="section-heading" style="margin-bottom: 1.2rem;">
+            <h2>Clientes escolhem o Ultrapremium pela experiência completa.</h2>
+          </div>
+
+          <div class="grid" style="gap: 1rem;">
+            <article class="card testimonial">
+              <div class="stars" aria-label="5 estrelas">★★★★★</div>
+              <p class="quote">“O ambiente, a apresentação dos pratos e a facilidade para reservar fazem toda a diferença.”</p>
+              <div class="reviewer">
+                <img class="avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80&auto=format&fit=crop" alt="Cliente satisfeita" loading="lazy" />
+                <div><strong>Marina S.</strong><span>Jardins, SP</span></div>
+              </div>
+            </article>
+
+            <article class="card testimonial">
+              <div class="stars" aria-label="5 estrelas">★★★★★</div>
+              <p class="quote">“O cardápio é claro, bonito e faz o visitante clicar sem pensar duas vezes.”</p>
+              <div class="reviewer">
+                <img class="avatar" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80&auto=format&fit=crop" alt="Cliente satisfeito" loading="lazy" />
+                <div><strong>Rafael M.</strong><span>Executivo</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="delivery" aria-label="Delivery">
+      <div class="container">
+        <div class="split reveal">
+          <div>
+            <span class="eyebrow">Delivery</span>
+            <div class="section-heading">
+              <h2>Entrega premium com a mesma assinatura visual da experiência presencial.</h2>
+              <p>Uma seção própria para delivery ajuda a capturar demanda sem afastar o visitante do fluxo principal de reserva e contato.</p>
+            </div>
+            <div class="grid" style="gap: .9rem;">
+              <div class="bullet"><div><strong>Embalagem sofisticada.</strong><p>Percepção de valor mesmo fora do salão.</p></div></div>
+              <div class="bullet"><div><strong>Pedidos rápidos.</strong><p>CTA direto para WhatsApp, telefone ou plataforma parceira.</p></div></div>
+              <div class="bullet"><div><strong>Menu adaptado.</strong><p>Itens pensados para transporte sem perder apresentação.</p></div></div>
+            </div>
+            <div class="hero-actions" style="margin-top: 1.25rem;">
+              <a class="btn btn-primary" href="#contato">Pedir agora</a>
+              <a class="btn btn-ghost" href="#cardapio">Explorar itens</a>
+            </div>
+          </div>
+          <div class="card menu-card reveal">
+            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1000&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=700&q=80&auto=format&fit=crop 700w, https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1000&q=80&auto=format&fit=crop 1000w, https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1400&q=80&auto=format&fit=crop 1400w" sizes="(max-width: 860px) 100vw, 50vw" alt="Delivery premium com pratos embalados" loading="lazy" />
+            <div class="card-pad">
+              <div class="tag-row"><span class="tag">Entrega</span><span class="tag">Mais conversão</span></div>
+              <h3>Experiência de alto padrão do clique à entrega.</h3>
+              <p>Textos curtos e blocos escaneáveis facilitam a decisão imediata do usuário no mobile.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="galeria" aria-label="Galeria">
+      <div class="container">
+        <div class="section-heading reveal">
+          <span class="eyebrow">Ambiente</span>
+          <h2>Visual rico que valoriza o espaço, a comida e o ritual.</h2>
+        </div>
+        <div class="gallery">
+          <img class="wide reveal" src="https://images.unsplash.com/photo-1516684732162-798a0062be99?w=900&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1516684732162-798a0062be99?w=600&q=80&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1516684732162-798a0062be99?w=900&q=80&auto=format&fit=crop 900w, https://images.unsplash.com/photo-1516684732162-798a0062be99?w=1200&q=80&auto=format&fit=crop 1200w" sizes="(max-width: 860px) 100vw, 40vw" alt="Ambiente premium do restaurante" loading="lazy" />
+          <img class="reveal" src="https://images.unsplash.com/photo-1559339352-11d035aa65de?w=700&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1559339352-11d035aa65de?w=500&q=80&auto=format&fit=crop 500w, https://images.unsplash.com/photo-1559339352-11d035aa65de?w=700&q=80&auto=format&fit=crop 700w, https://images.unsplash.com/photo-1559339352-11d035aa65de?w=1000&q=80&auto=format&fit=crop 1000w" sizes="(max-width: 860px) 100vw, 30vw" alt="Taça e mesa elegante" loading="lazy" />
+          <img class="reveal" src="https://images.unsplash.com/photo-1547592180-85f173990554?w=700&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1547592180-85f173990554?w=500&q=80&auto=format&fit=crop 500w, https://images.unsplash.com/photo-1547592180-85f173990554?w=700&q=80&auto=format&fit=crop 700w, https://images.unsplash.com/photo-1547592180-85f173990554?w=1000&q=80&auto=format&fit=crop 1000w" sizes="(max-width: 860px) 100vw, 30vw" alt="Chef em cozinha profissional" loading="lazy" />
+          <img class="reveal" src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=700&q=80&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=500&q=80&auto=format&fit=crop 500w, https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=700&q=80&auto=format&fit=crop 700w, https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=1000&q=80&auto=format&fit=crop 1000w" sizes="(max-width: 860px) 100vw, 30vw" alt="Prato servido com refinamento" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="localizacao" aria-label="Localização">
+      <div class="container contact-grid reveal">
+        <div class="contact-card">
+          <div class="section-heading" style="margin-bottom: 0;">
+            <span class="eyebrow">Localização e contato</span>
+            <h2>Estamos prontos para receber sua marca, sua audiência e sua próxima reserva.</h2>
+          </div>
+
+          <div class="contact-list">
+            <div class="contact-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s6-5.2 6-11a6 6 0 10-12 0c0 5.8 6 11 6 11z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="2"/></svg>
+              <div><strong>Av. das Orquídeas, 1000</strong><p>Jardins, São Paulo — SP</p></div>
+            </div>
+            <div class="contact-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 016.5 3h11A2.5 2.5 0 0120 5.5v13A2.5 2.5 0 0117.5 21h-11A2.5 2.5 0 014 18.5v-13z" stroke="currentColor" stroke-width="2"/><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <div><strong>(11) 99999-9999</strong><p>WhatsApp e ligações</p></div>
+            </div>
+            <div class="contact-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="2"/></svg>
+              <div><strong>contato@ultrapremium.com.br</strong><p>Reservas, eventos e parcerias</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="map" aria-label="Mapa do restaurante">
+          <iframe title="Mapa da localização do restaurante" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=Av.%20Paulista%2C%20S%C3%A3o%20Paulo&output=embed"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contato" aria-label="Contato">
+      <div class="container cta-band reveal">
+        <div>
+          <span class="eyebrow">Contato rápido</span>
+          <h2 style="color:#fff; margin-top:.5rem;">Quer adaptar este template para outro restaurante?</h2>
+          <p style="margin-top:.7rem; max-width: 40rem;">Troque os tokens, imagens e textos e mantenha a mesma base premium para menu, reservas, contato, localização, redes sociais, delivery e sobre nós.</p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href="#reservas">Reservar</a>
+          <a class="btn btn-secondary" href="#redes-sociais">Ver redes</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="redes-sociais" aria-label="Redes sociais">
+      <div class="container reveal">
+        <div class="section-heading">
+          <span class="eyebrow">Redes sociais</span>
+          <h2>Presença elegante também fora do site.</h2>
+          <p>Inclua os perfis oficiais para reforçar prova social e capturar tráfego de retorno.</p>
+        </div>
+        <div class="card card-pad" style="display:grid; gap:1rem;">
+          <div class="socials" aria-label="Links sociais">
+            <a href="https://instagram.com" aria-label="Instagram">IG</a>
+            <a href="https://facebook.com" aria-label="Facebook">FB</a>
+            <a href="https://tiktok.com" aria-label="TikTok">TT</a>
+            <a href="https://whatsapp.com" aria-label="WhatsApp">WA</a>
+          </div>
+          <p>Instagram, Facebook, TikTok e WhatsApp podem ser conectados em segundos para ampliar alcance e conversão.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq" aria-label="Perguntas frequentes">
+      <div class="container reveal">
+        <div class="section-heading">
+          <span class="eyebrow">FAQ</span>
+          <h2>Dúvidas comuns antes da reserva.</h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>Este template funciona para qualquer restaurante?</summary>
+            <p>Sim. Ele foi desenhado como white-label, então você pode trocar a identidade visual, textos, imagens, links e dados de contato sem refazer a estrutura.</p>
+          </details>
+          <details>
+            <summary>Onde altero o tema visual?</summary>
+            <p>No bloco <strong>:root</strong> do CSS. As variáveis de cor, tipografia, sombras, bordas e espaçamentos controlam praticamente toda a aparência.</p>
+          </details>
+          <details>
+            <summary>O site já está otimizado para SEO?</summary>
+            <p>Ele já inclui meta tags, Open Graph, Twitter Card, JSON-LD de restaurante, headings semânticos e estrutura pronta para indexação.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand" style="color:#fff; margin-bottom:.8rem;">
+            <span class="brand-mark" aria-hidden="true">✦</span>
+            <span class="brand-text"><strong>Ultrapremium</strong><span>Fine dining experience</span></span>
+          </div>
+          <p style="max-width: 30rem;">Template de landing page premium para restaurantes com foco em conversão, acessibilidade, SEO e personalização total por tokens.</p>
+        </div>
+        <div>
+          <strong style="color:#fff; display:block; margin-bottom:.7rem;">Navegação</strong>
+          <div style="display:grid; gap:.5rem;">
+            <a href="#sobre">Sobre nós</a>
+            <a href="#cardapio">Cardápio</a>
+            <a href="#reservas">Reservas</a>
+            <a href="#delivery">Delivery</a>
+          </div>
+        </div>
+        <div>
+          <strong style="color:#fff; display:block; margin-bottom:.7rem;">Contato</strong>
+          <div style="display:grid; gap:.5rem;">
+            <a href="tel:+5511999999999">(11) 99999-9999</a>
+            <a href="mailto:contato@ultrapremium.com.br">contato@ultrapremium.com.br</a>
+            <a href="#localizacao">Localização</a>
+          </div>
+        </div>
+      </div>
+      <div class="copyright">© <span id="year"></span> Ultrapremium. Todos os direitos reservados.</div>
+    </div>
+  </footer>
+
+  <script>
+    const header = document.getElementById('siteHeader');
+    const menuToggle = document.getElementById('menuToggle');
+    const mobilePanel = document.getElementById('mobilePanel');
+    const year = document.getElementById('year');
+    const navLinks = [...document.querySelectorAll('.nav-link, .mobile-nav a')];
+    const sections = [...document.querySelectorAll('main section[id]')];
+    const form = document.getElementById('reservationForm');
+    const feedback = document.getElementById('formFeedback');
+
+    year.textContent = new Date().getFullYear();
+
+    const setHeaderState = () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 12);
+    };
+    setHeaderState();
+    window.addEventListener('scroll', setHeaderState, { passive: true });
+
+    const closeMenu = () => {
+      mobilePanel.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.textContent = '☰';
+    };
+
+    menuToggle.addEventListener('click', () => {
+      const open = mobilePanel.classList.toggle('open');
+      menuToggle.setAttribute('aria-expanded', String(open));
+      menuToggle.textContent = open ? '×' : '☰';
+    });
+
+    mobilePanel.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+
+    document.addEventListener('click', (e) => {
+      if (!mobilePanel.contains(e.target) && !menuToggle.contains(e.target)) closeMenu();
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('in-view');
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(a => a.removeAttribute('aria-current'));
+          const id = entry.target.id;
+          navLinks.forEach(a => {
+            if (a.getAttribute('href') === `#${id}`) a.setAttribute('aria-current', 'true');
+          });
+        }
+      });
+    }, { rootMargin: '-40% 0px -45% 0px', threshold: 0.01 });
+
+    sections.forEach(section => sectionObserver.observe(section));
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      feedback.textContent = name ? `Reserva enviada com sucesso, ${name}. Entraremos em contato em instantes.` : 'Reserva enviada com sucesso.';
+      form.reset();
+    });
+
+    // Melhora o offset de âncoras para o header fixo
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (!target) return;
+        e.preventDefault();
+        const offset = header.getBoundingClientRect().height + 8;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>
