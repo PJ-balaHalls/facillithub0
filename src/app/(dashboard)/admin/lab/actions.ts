@@ -5,18 +5,18 @@ import { createClient } from '@/lib/server'
 import { revalidatePath } from 'next/cache'
 import type { ConfigJson, LabNiche } from '@/types/lab'
 
-// ─── GITHUB HELPERS ──────────────────────────────────────────────────────────
-
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN!
 const GITHUB_ORG   = process.env.GITHUB_ORG || 'facillithub'
 const GH_API       = 'https://api.github.com'
+
+// ─── GITHUB HELPERS ──────────────────────────────────────────────────────────
 
 async function githubFetch(path: string, options?: RequestInit) {
   const res = await fetch(`${GH_API}${path}`, {
     ...options,
     headers: {
       'Authorization': `Bearer ${GITHUB_TOKEN}`,
-      'Accept':        'application/vnd.github+json',
+      'Accept':        'application/vnd.github.v3+json',
       'X-GitHub-Api-Version': '2022-11-28',
       'Content-Type':  'application/json',
       ...(options?.headers || {}),
@@ -24,71 +24,128 @@ async function githubFetch(path: string, options?: RequestInit) {
   })
   if (!res.ok) {
     const body = await res.text()
-    throw new Error(`GitHub API ${res.status}: ${body}`)
+    throw new Error(`[${options?.method || 'GET'} ${path}] -> GitHub API Error: ${body}`)
   }
+  if (res.status === 204) return {}
   return res.json()
 }
 
-/**
- * Cria um repo a partir de um template e commita o config.json
- * Returns: { repoName, htmlUrl, pagesUrl }
- */
+// ─── MOTOR DE PERSONALIZAÇÃO (HTML) ──────────────────────────────────────────
+
+function generateMenuHtml(menuItems: any[]) {
+  if (!menuItems || !menuItems.length) return '<p class="text-center opacity-50 py-10">Cardápio em atualização...</p>';
+  return menuItems.map(item => `
+    <div class="menu-item reveal">
+      <div class="menu-item-header">
+        <span class="menu-item-name">${item.nome}</span>
+        <span class="menu-item-price">R$ ${item.preco}</span>
+      </div>
+      <p class="menu-item-desc">${item.descricao}</p>
+    </div>
+  `).join('');
+}
+
 async function deployToGithubPages(
   templateRepo: string,
   slug: string,
-  config: ConfigJson
+  config: any,
+  features: any
 ): Promise<{ repoName: string; htmlUrl: string; pagesUrl: string }> {
 
   const repoName = `prev-${slug}`
+  let cleanTemplate = templateRepo.trim()
+    .replace(/^(https?:\/\/)?(www\.)?github\.com\//, '')
+    .replace(/\.git$/, '')
 
-  // 1. Criar repositório a partir do template
-  await githubFetch(`/repos/${templateRepo}/generate`, {
+  // 1. Criar repositório do template
+  await githubFetch(`/repos/${cleanTemplate}/generate`, {
     method: 'POST',
     body: JSON.stringify({
-      owner:       GITHUB_ORG,
-      name:        repoName,
-      description: `Facillit Lab — Prévia: ${config.nomeEmpresa}`,
-      private:     false,
-      include_all_branches: false,
+      owner: GITHUB_ORG,
+      name: repoName,
+      description: `Facillit Lab — Preview: ${config.nomeEmpresa || 'Cliente'}`,
+      private: false,
+      include_all_branches: false
     }),
   })
 
-  // 2. Aguardar o repo existir (GitHub Pages leva ~2s para criar)
-  await new Promise(r => setTimeout(r, 3000))
+  // 2. Polling: Aguarda o repo existir (máximo 30s)
+  let isReady = false;
+  for (let i = 0; i < 15; i++) {
+    await new Promise(r => setTimeout(r, 2000))
+    try {
+      await githubFetch(`/repos/${GITHUB_ORG}/${repoName}`)
+      isReady = true; break;
+    } catch {}
+  }
+  if (!isReady) throw new Error("O GitHub demorou demais para provisionar o repositório.")
+  await new Promise(r => setTimeout(r, 2000))
 
-  // 3. Obter SHA do config.json existente (ou criar se não existir)
-  let existingSha: string | undefined
-  try {
-    const existing = await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/config.json`)
-    existingSha = existing.sha
-  } catch { /* arquivo não existe ainda, ok */ }
+  // 3. Processar Injeção de Identidade no HTML
+  const indexData = await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/index.html`)
+  let html = Buffer.from(indexData.content, 'base64').toString('utf-8')
 
-  // 4. Commitar o config.json com os dados do cliente
-  const content = Buffer.from(JSON.stringify(config, null, 2)).toString('base64')
-  await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/config.json`, {
+  const tokens: Record<string, string> = {
+    nomeEmpresa:      config.nomeEmpresa || "Nova Experiência",
+    slogan:           config.slogan || "Excelência em cada detalhe",
+    metaDescricao:    config.metaDescricao || "Venha viver uma experiência única conosco.",
+    corPrimaria:      config.corPrimaria || "#b8860b",
+    corPrimariaHover: config.corPrimariaHover || "#9a7209",
+    fonteTitulo:      config.fonteTitulo || "Playfair Display",
+    fonteCorpo:       config.fonteCorpo || "Inter",
+    telefoneWhatsapp: config.telefoneWhatsapp || "",
+    linkImagemHero:   config.linkImagemHero || "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b",
+    linkImagemSobre:  config.linkImagemSobre || "https://images.unsplash.com/photo-1559339352-11d035aa65de",
+    sobreNosTitulo:   config.sobreNosTitulo || "Nossa Essência",
+    sobreNosTexto:    config.sobreNosTexto || "Trabalhamos para entregar o melhor.",
+    cidade:           config.cidade || "São Paulo",
+    cardapioHtml:     generateMenuHtml(config.cardapio || []),
+    featureFlagsCss: `
+      ${!features?.menu_list ? '#menu { display: none !important; }' : ''}
+      ${!features?.booking_form ? '#reserva { display: none !important; }' : ''}
+      ${!features?.whatsapp_button ? '.whatsapp { display: none !important; }' : ''}
+    `
+  }
+
+  for (const [key, val] of Object.entries(tokens)) {
+    html = html.replace(new RegExp(`{{${key}}}`, 'g'), val)
+  }
+
+  // 4. Update index.html
+  await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/index.html`, {
     method: 'PUT',
     body: JSON.stringify({
-      message: `chore: config inicial — ${config.nomeEmpresa}`,
-      content,
-      ...(existingSha ? { sha: existingSha } : {}),
+      message: `🎨 style: identidade visual aplicada`,
+      content: Buffer.from(html).toString('base64'),
+      sha: indexData.sha
     }),
   })
 
-  // 5. Ativar GitHub Pages (branch main, pasta root)
+  // 5. Update config.json
+  const configContent = Buffer.from(JSON.stringify(config, null, 2)).toString('base64')
+  try {
+    await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/config.json`, {
+      method: 'PUT',
+      body: JSON.stringify({ message: 'chore: config inicial', content: configContent }),
+    })
+  } catch (e) {}
+
+  // 6. Ativar Pages
   try {
     await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/pages`, {
       method: 'POST',
       body: JSON.stringify({ source: { branch: 'main', path: '/' } }),
     })
-  } catch { /* Pages pode já estar ativo via template */ }
+  } catch (e) {}
 
-  const pagesUrl = `https://${GITHUB_ORG}.github.io/${repoName}`
-  const htmlUrl  = `https://github.com/${GITHUB_ORG}/${repoName}`
-
-  return { repoName, htmlUrl, pagesUrl }
+  return { 
+    repoName, 
+    htmlUrl: `https://github.com/${GITHUB_ORG}/${repoName}`,
+    pagesUrl: `https://${GITHUB_ORG}.github.io/${repoName}` 
+  }
 }
 
-// ─── STATUS & MONITORAMENTO (NOVO) ───────────────────────────────────────────
+// ─── STATUS & TEMPLATES ──────────────────────────────────────────────────────
 
 export async function checkEnvStatus() {
   return {
@@ -99,285 +156,138 @@ export async function checkEnvStatus() {
   }
 }
 
-// ─── TEMPLATES ───────────────────────────────────────────────────────────────
-
 export async function createTemplate(formData: any) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
   if (!user) return { success: false, error: 'Não autorizado' }
 
   const { error } = await supabase.from('lab_templates').insert({
-    name:                 formData.name,
-    niche:                formData.niche,
-    description:          formData.description,
+    name: formData.name,
+    niche: formData.niche,
+    description: formData.description,
     github_template_repo: formData.github_template_repo,
-    thumbnail_url:        formData.thumbnail_url || null,
-    preview_demo_url:     formData.preview_demo_url || null,
-    created_by:           user.id,
-    is_active:            true,
-    default_features: {
-      seo_schema: true,
-      whatsapp_button: true,
-      google_maps: true
-    }
+    preview_demo_url: formData.preview_demo_url,
+    created_by: user.id,
+    is_active: true,
+    default_features: { whatsapp_button: true, booking_form: true, menu_list: true, seo_schema: true }
   })
 
-  if (error) {
-    console.error('Erro ao criar template:', error)
-    return { success: false, error: error.message }
-  }
-
+  if (error) return { success: false, error: error.message }
   revalidatePath('/admin/lab/templates')
   return { success: true }
 }
 
 export async function toggleTemplateStatus(id: string, is_active: boolean) {
   const supabase = await createClient()
-  const { error } = await supabase
-    .from('lab_templates')
-    .update({ is_active })
-    .eq('id', id)
-  if (error) throw error
+  await supabase.from('lab_templates').update({ is_active }).eq('id', id)
   revalidatePath('/admin/lab/templates')
 }
 
-// ─── PREVIEWS ────────────────────────────────────────────────────────────────
+// ─── PREVIEWS & GERAÇÃO ──────────────────────────────────────────────────────
 
-export interface GeneratePreviewInput {
-  template_id: string
-  lead_id?: string
-  company_name: string
-  niche: LabNiche
-  config: ConfigJson
-}
-
-export async function generatePreview(input: GeneratePreviewInput) {
+export async function generatePreview(input: any) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Não autorizado')
 
-  // Buscar template
-  const { data: template } = await supabase
-    .from('lab_templates')
-    .select('*')
-    .eq('id', input.template_id)
-    .single()
-  if (!template) throw new Error('Template não encontrado')
+  const { data: template } = await supabase.from('lab_templates').select('*').eq('id', input.template_id).single()
+  const slug = `${input.company_name.toLowerCase().replace(/\s+/g, '-')}-${Date.now().toString(36)}`
 
-  // Gerar slug único
-  const baseSlug = input.company_name
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-')
-    .slice(0, 40)
-  const slug = `${baseSlug}-${Date.now().toString(36)}`
-
-  // Criar registro com status "building"
-  const { data: preview, error: insertError } = await supabase
-    .from('lab_previews')
-    .insert({
-      template_id:  input.template_id,
-      lead_id:      input.lead_id || null,
-      slug,
-      company_name: input.company_name,
-      niche:        input.niche,
-      config_json:  input.config,
-      features:     template.default_features,
-      status:       'building',
-      modo_previa:  true,
-      generated_by: user.id,
-    })
-    .select()
-    .single()
+  const { data: preview, error: insertError } = await supabase.from('lab_previews').insert({
+    template_id: input.template_id,
+    company_name: input.company_name,
+    niche: input.niche,
+    status: 'building',
+    slug,
+    config_json: input.config,
+    features: template.default_features,
+    generated_by: user.id,
+    modo_previa: true
+  }).select().single()
 
   if (insertError) throw insertError
 
-  // Log
-  await supabase.from('lab_deployment_logs').insert({
-    preview_id:  preview.id,
-    status:      'building',
-    message:     'Geração iniciada — conectando ao GitHub',
-    triggered_by: user.id,
-  })
-
-  // Deploy (em produção isso seria um background job; aqui é síncrono)
   try {
-    const { repoName, pagesUrl } = await deployToGithubPages(
-      template.github_template_repo,
-      slug,
-      { ...input.config, modoPrevia: true, features: template.default_features }
-    )
-
-    await supabase.from('lab_previews').update({
-      github_repo: repoName,
-      preview_url: pagesUrl,
-      status:      'live',
-    }).eq('id', preview.id)
-
-    await supabase.from('lab_deployment_logs').insert({
-      preview_id: preview.id,
-      status:     'live',
-      message:    `Deploy concluído: ${pagesUrl}`,
-      triggered_by: user.id,
-    })
-
+    const { repoName, pagesUrl } = await deployToGithubPages(template.github_template_repo, slug, input.config, template.default_features)
+    await supabase.from('lab_previews').update({ github_repo: repoName, preview_url: pagesUrl, status: 'live' }).eq('id', preview.id)
+    revalidatePath('/admin/lab/previews')
+    return { success: true, url: pagesUrl }
   } catch (err: any) {
-    await supabase.from('lab_previews').update({
-      status:    'failed',
-      error_log: err.message,
-    }).eq('id', preview.id)
-
-    await supabase.from('lab_deployment_logs').insert({
-      preview_id: preview.id,
-      status:     'failed',
-      message:    `Erro: ${err.message}`,
-      triggered_by: user.id,
-    })
-
+    await supabase.from('lab_previews').update({ status: 'failed', error_log: err.message }).eq('id', preview.id)
     throw err
   }
-
-  revalidatePath('/admin/lab/previews')
-  return preview
 }
 
 export async function refreshPreviewStatus(previewId: string) {
   const supabase = await createClient()
-  const { data: preview } = await supabase
-    .from('lab_previews')
-    .select('github_repo, status')
-    .eq('id', previewId)
-    .single()
-
+  const { data: preview } = await supabase.from('lab_previews').select('github_repo, status').eq('id', previewId).single()
   if (!preview?.github_repo || preview.status !== 'building') return
-
-  // Verificar se o GitHub Pages já está no ar
   try {
-    const res = await fetch(`https://${GITHUB_ORG}.github.io/${preview.github_repo}/`, {
-      method: 'HEAD',
-      signal: AbortSignal.timeout(5000),
-    })
-    if (res.ok) {
-      await supabase.from('lab_previews')
-        .update({ status: 'live' })
-        .eq('id', previewId)
-    }
-  } catch { /* ainda buildando */ }
-
+    const res = await fetch(`https://${GITHUB_ORG}.github.io/${preview.github_repo}/`, { method: 'HEAD' })
+    if (res.ok) { await supabase.from('lab_previews').update({ status: 'live' }).eq('id', previewId) }
+  } catch {}
   revalidatePath('/admin/lab/previews')
 }
 
 export async function updatePreviewConfig(previewId: string, config: Partial<ConfigJson>) {
   const supabase = await createClient()
-  const { data: preview } = await supabase
-    .from('lab_previews')
-    .select('config_json, github_repo')
-    .eq('id', previewId)
-    .single()
-
+  const { data: preview } = await supabase.from('lab_previews').select('*').eq('id', previewId).single()
   if (!preview) throw new Error('Preview não encontrado')
 
   const newConfig = { ...preview.config_json, ...config }
+  await supabase.from('lab_previews').update({ config_json: newConfig, status: 'building' }).eq('id', previewId)
 
-  await supabase.from('lab_previews')
-    .update({ config_json: newConfig, status: 'building' })
-    .eq('id', previewId)
-
-  // Re-commit o config.json no GitHub
   if (preview.github_repo) {
     try {
-      const existing = await githubFetch(
-        `/repos/${GITHUB_ORG}/${preview.github_repo}/contents/config.json`
-      )
+      // Update config.json no GitHub
+      const existing = await githubFetch(`/repos/${GITHUB_ORG}/${preview.github_repo}/contents/config.json`)
       const content = Buffer.from(JSON.stringify(newConfig, null, 2)).toString('base64')
-      await githubFetch(
-        `/repos/${GITHUB_ORG}/${preview.github_repo}/contents/config.json`,
-        {
-          method: 'PUT',
-          body: JSON.stringify({
-            message: 'chore: atualização de config',
-            content,
-            sha: existing.sha,
-          }),
-        }
-      )
+      await githubFetch(`/repos/${GITHUB_ORG}/${preview.github_repo}/contents/config.json`, {
+        method: 'PUT',
+        body: JSON.stringify({ message: 'chore: update config', content, sha: existing.sha }),
+      })
       await supabase.from('lab_previews').update({ status: 'live' }).eq('id', previewId)
     } catch (err: any) {
-      await supabase.from('lab_previews').update({
-        status: 'failed', error_log: err.message
-      }).eq('id', previewId)
+      await supabase.from('lab_previews').update({ status: 'failed', error_log: err.message }).eq('id', previewId)
     }
   }
-
   revalidatePath('/admin/lab/previews')
   revalidatePath('/admin/lab/ativacao')
 }
 
-// ─── FEATURE FLAGS ───────────────────────────────────────────────────────────
+// ─── FEATURES & ATIVAÇÃO ─────────────────────────────────────────────────────
 
-export async function toggleFeatureFlag(
-  previewId: string,
-  featureKey: string,
-  enabled: boolean,
-  config: Record<string, unknown> = {}
-) {
+export async function toggleFeatureFlag(previewId: string, featureKey: string, enabled: boolean, config: Record<string, unknown> = {}) {
   const supabase = await createClient()
-
   const { error } = await supabase.rpc('toggle_lab_feature', {
-    p_preview_id:  previewId,
-    p_feature_key: featureKey,
-    p_enabled:     enabled,
-    p_config:      config,
+    p_preview_id: previewId, p_feature_key: featureKey, p_enabled: enabled, p_config: config,
   })
-
   if (error) throw error
   revalidatePath('/admin/lab/previews')
   revalidatePath('/admin/lab/ativacao')
 }
-
-// ─── ATIVAÇÃO ────────────────────────────────────────────────────────────────
 
 export async function activateSite(previewId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Não autorizado')
 
-  // Chama a função RPC que remove o modo prévia
-  const { error } = await supabase.rpc('activate_lab_preview', {
-    p_preview_id: previewId,
-  })
-  if (error) throw error
+  const { error: rpcError } = await supabase.rpc('activate_lab_preview', { p_preview_id: previewId })
+  if (rpcError) throw rpcError
 
-  // Re-commit o config.json sem o modo prévia
-  const { data: preview } = await supabase
-    .from('lab_previews')
-    .select('config_json, github_repo, features')
-    .eq('id', previewId)
-    .single()
-
+  const { data: preview } = await supabase.from('lab_previews').select('*').eq('id', previewId).single()
   if (preview?.github_repo) {
     try {
       const newConfig = { ...preview.config_json, modoPrevia: false, features: preview.features }
-      const existing  = await githubFetch(
-        `/repos/${GITHUB_ORG}/${preview.github_repo}/contents/config.json`
-      )
+      const existing = await githubFetch(`/repos/${GITHUB_ORG}/${preview.github_repo}/contents/config.json`)
       const content = Buffer.from(JSON.stringify(newConfig, null, 2)).toString('base64')
-      await githubFetch(
-        `/repos/${GITHUB_ORG}/${preview.github_repo}/contents/config.json`,
-        {
-          method: 'PUT',
-          body: JSON.stringify({
-            message: '🚀 chore: ativação do site — modo prévia removido',
-            content,
-            sha: existing.sha,
-          }),
-        }
-      )
+      await githubFetch(`/repos/${GITHUB_ORG}/${preview.github_repo}/contents/config.json`, {
+        method: 'PUT',
+        body: JSON.stringify({ message: '🚀 chore: site ativado - produção', content, sha: existing.sha }),
+      })
       await supabase.from('lab_previews').update({ status: 'live' }).eq('id', previewId)
-    } catch { /* log já criado pelo RPC */ }
+    } catch {}
   }
-
   revalidatePath('/admin/lab/ativacao')
   revalidatePath('/admin/lab/previews')
 }
@@ -386,31 +296,16 @@ export async function activateSite(previewId: string) {
 
 export async function createFormToken(leadId: string) {
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('lab_form_submissions')
-    .insert({ lead_id: leadId })
-    .select('public_token')
-    .single()
+  const { data, error } = await supabase.from('lab_form_submissions').insert({ lead_id: leadId }).select('public_token').single()
   if (error) throw error
   return data.public_token
 }
 
 export async function processFormSubmission(token: string) {
   const supabase = await createClient()
-  const { data: submission } = await supabase
-    .from('lab_form_submissions')
-    .select('*')
-    .eq('public_token', token)
-    .single()
-
-  if (!submission) throw new Error('Formulário não encontrado')
-  if (submission.status !== 'pending') throw new Error('Formulário já processado')
-
-  await supabase.from('lab_form_submissions').update({
-    status:       'processing',
-    processed_at: new Date().toISOString(),
-  }).eq('id', submission.id)
-
+  const { data: sub } = await supabase.from('lab_form_submissions').select('*').eq('public_token', token).single()
+  if (!sub) throw new Error('Não encontrado')
+  await supabase.from('lab_form_submissions').update({ status: 'processing', processed_at: new Date().toISOString() }).eq('id', sub.id)
   revalidatePath('/admin/lab/previews')
-  return submission
+  return sub
 }

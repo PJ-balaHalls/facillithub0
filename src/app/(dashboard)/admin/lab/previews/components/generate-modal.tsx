@@ -1,325 +1,256 @@
-// src/app/(dashboard)/admin/lab/previews/components/generate-modal.tsx
+// src/app/(dashboard)/admin/lab/templates/components/create-template-modal.tsx
 "use client"
 
-import { useState, useTransition } from "react"
-import { generatePreview } from "../../../lab/actions"
-import type { LabTemplate, LabNiche, ConfigJson } from "@/types/lab"
-import { NICHE_LABELS } from "@/types/lab"
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, Rocket, ChevronRight, ChevronLeft, Check } from "lucide-react"
+import { createTemplate } from "../../actions"
 import { toast } from "sonner"
+import { 
+  Globe, 
+  Tag, 
+  FileText, 
+  Loader2, 
+  Plus, 
+  Info, 
+  Layout, 
+  ExternalLink, 
+  Settings2, 
+  ShieldCheck 
+} from "lucide-react"
 
-interface Props {
-  templates: LabTemplate[]
-  children: React.ReactNode
+/**
+ * Ícone do GitHub definido manualmente para evitar erro de exportação do lucide-react
+ */
+function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.2c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+      <path d="M9 18c-4.51 2-5-2-7-2" />
+    </svg>
+  )
 }
 
-type Step = 'template' | 'identity' | 'contact' | 'review'
+export function CreateTemplateModal({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-const STEPS: { key: Step; label: string }[] = [
-  { key: 'template',  label: 'Template' },
-  { key: 'identity',  label: 'Identidade' },
-  { key: 'contact',   label: 'Contato' },
-  { key: 'review',    label: 'Revisão' },
-]
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setLoading(true)
+    
+    const formData = new FormData(e.currentTarget)
+    const data = Object.fromEntries(formData.entries())
 
-export function GenerateModal({ templates, children }: Props) {
-  const [open, setOpen]               = useState(false)
-  const [step, setStep]               = useState<Step>('template')
-  const [selectedTemplate, setTpl]    = useState<LabTemplate | null>(null)
-  const [isPending, startTransition]  = useTransition()
-
-  // Form state
-  const [form, setForm] = useState({
-    company_name:   '',
-    niche:          '' as LabNiche | '',
-    slogan:         '',
-    descricao:      '',
-    corPrimaria:    '#5CA3FF',
-    corSecundaria:  '#1A1A2E',
-    telefone:       '',
-    numeroWhatsApp: '',
-    email:          '',
-    endereco:       '',
-    urlMaps:        '',
-    instagram:      '',
-  })
-
-  const update = (k: keyof typeof form, v: string) => setForm(p => ({ ...p, [k]: v }))
-
-  const stepIndex = STEPS.findIndex(s => s.key === step)
-  const canNext   = step === 'template'  ? !!selectedTemplate :
-                    step === 'identity'  ? !!form.company_name && !!form.niche :
-                    step === 'contact'   ? true : false
-
-  const handleSubmit = () => {
-    if (!selectedTemplate) return
-
-    const config: ConfigJson = {
-      nomeEmpresa:    form.company_name,
-      slogan:         form.slogan || undefined,
-      descricao:      form.descricao || undefined,
-      corPrimaria:    form.corPrimaria,
-      corSecundaria:  form.corSecundaria,
-      fonteTitulo:    selectedTemplate.default_tokens?.fonteTitulo ?? 'Inter',
-      fonteCopo:      selectedTemplate.default_tokens?.fonteCopo ?? 'Inter',
-      telefone:       form.telefone || undefined,
-      numeroWhatsApp: form.numeroWhatsApp || undefined,
-      email:          form.email || undefined,
-      endereco:       form.endereco || undefined,
-      urlMaps:        form.urlMaps || undefined,
-      instagram:      form.instagram || undefined,
-      modoPrevia:     true,
-      features:       selectedTemplate.default_features,
-    }
-
-    startTransition(async () => {
-      try {
-        await generatePreview({
-          template_id:  selectedTemplate.id,
-          company_name: form.company_name,
-          niche:        form.niche as LabNiche,
-          config,
-        })
-        toast.success('Prévia em geração! Aguarde alguns segundos.', {
-          description: 'O status será atualizado automaticamente.'
-        })
+    try {
+      const res = await createTemplate(data)
+      if (res.success) {
+        toast.success("Template mestre configurado com sucesso!")
         setOpen(false)
-        setStep('template')
-        setTpl(null)
-        setForm({ company_name: '', niche: '', slogan: '', descricao: '', corPrimaria: '#5CA3FF', corSecundaria: '#1A1A2E', telefone: '', numeroWhatsApp: '', email: '', endereco: '', urlMaps: '', instagram: '' })
-      } catch (err: any) {
-        toast.error('Erro na geração: ' + err.message)
+      } else {
+        toast.error("Erro ao salvar no banco: " + res.error)
       }
-    })
+    } catch (err) {
+      toast.error("Erro crítico na comunicação com o servidor de infraestrutura.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setStep('template') }}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="bg-white rounded-[2rem] border-none shadow-[0_20px_60px_rgb(0,0,0,0.1)] sm:max-w-xl p-0 overflow-hidden">
-        
-        {/* Progress header */}
-        <div className="p-8 pb-0">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-blue-50 rounded-2xl border border-blue-100">
-                <Rocket strokeWidth={1.5} className="size-5 text-[#5CA3FF]" />
-              </div>
-              <DialogTitle className="text-lg font-semibold tracking-tight">Gerar Prévia</DialogTitle>
+      <DialogContent className="sm:max-w-[800px] rounded-[3.5rem] p-0 overflow-hidden border-none shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] bg-white">
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          
+          {/* Header Ultrapremium - Lab Factory Identity */}
+          <div className="bg-[#0a0a0a] p-12 text-white relative overflow-hidden shrink-0">
+            <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
+              <Layout className="size-48 rotate-12" />
             </div>
-          </DialogHeader>
-
-          {/* Step indicators */}
-          <div className="flex items-center gap-2 mb-8">
-            {STEPS.map((s, i) => (
-              <div key={s.key} className="flex items-center gap-2">
-                <div className={`flex items-center justify-center size-6 rounded-full text-[11px] font-bold transition-colors ${
-                  i < stepIndex ? 'bg-emerald-500 text-white' :
-                  i === stepIndex ? 'bg-[#5CA3FF] text-white' :
-                  'bg-gray-100 text-gray-400'
-                }`}>
-                  {i < stepIndex ? <Check className="size-3" /> : i + 1}
+            <DialogHeader className="relative z-10">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-[#5CA3FF]/20 rounded-2xl border border-white/5">
+                  <Layout className="size-8 text-[#5CA3FF]" />
                 </div>
-                <span className={`text-[12px] font-medium ${i === stepIndex ? 'text-gray-900' : 'text-gray-400'}`}>
-                  {s.label}
-                </span>
-                {i < STEPS.length - 1 && <ChevronRight className="size-3 text-gray-200 mx-1" />}
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#5CA3FF]">Lab Factory v2.0</span>
+                  <DialogTitle className="text-3xl font-bold tracking-tight mt-1">Configurar Template Mestre</DialogTitle>
+                </div>
               </div>
-            ))}
+              <p className="text-gray-400 text-sm font-light max-w-lg leading-relaxed">
+                Registre o repositório base que servirá de semente para clonagem e injeção dinâmica de conteúdo para seus novos clientes.
+              </p>
+            </DialogHeader>
           </div>
-        </div>
 
-        {/* Step content */}
-        <div className="px-8 pb-4 min-h-[280px]">
+          {/* Form Content - Scrolável */}
+          <div className="p-12 space-y-12 max-h-[60vh] overflow-y-auto custom-scrollbar bg-white">
+            
+            {/* Secção 1: Classificação Comercial */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-6">
+                <div className="flex items-center gap-2">
+                  <div className="size-1.5 rounded-full bg-[#5CA3FF]" />
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Identificação</h3>
+                </div>
+                
+                <div className="space-y-5">
+                  <div className="group space-y-2">
+                    <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">Nome Público do Modelo</label>
+                    <div className="relative">
+                      <Tag className="absolute left-5 top-4.5 size-4 text-gray-300 group-focus-within:text-[#5CA3FF] transition-colors" />
+                      <input 
+                        name="name" 
+                        required 
+                        placeholder="Ex: Ultrapremium Restaurante v2" 
+                        className="w-full pl-12 pr-6 py-4.5 rounded-2xl bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm font-medium text-gray-900" 
+                      />
+                    </div>
+                  </div>
 
-          {/* STEP 1: Template */}
-          {step === 'template' && (
-            <div className="space-y-3">
-              <p className="text-[13px] font-medium text-gray-700 mb-4">Selecione o template base para este nicho:</p>
-              {templates.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => { setTpl(t); update('niche', t.niche) }}
-                  className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
-                    selectedTemplate?.id === t.id
-                      ? 'border-[#5CA3FF] bg-blue-50/30'
-                      : 'border-gray-100 hover:border-gray-200 bg-white'
-                  }`}
-                >
-                  <div className={`size-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
-                    selectedTemplate?.id === t.id ? 'bg-[#5CA3FF] text-white' : 'bg-gray-100'
-                  }`}>
-                    🏗
+                  <div className="group space-y-2">
+                    <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">Nicho de Mercado</label>
+                    <div className="relative">
+                      <Settings2 className="absolute left-5 top-4.5 size-4 text-gray-300" />
+                      <select 
+                        name="niche" 
+                        className="w-full pl-12 pr-10 py-4.5 rounded-2xl bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm font-medium appearance-none text-gray-900 cursor-pointer"
+                      >
+                        <option value="restaurante">Gastronomia & Restaurantes</option>
+                        <option value="clinica">Saúde & Clínicas Médicas</option>
+                        <option value="salao_beleza">Estética & Centros de Beleza</option>
+                        <option value="barbearia">Barbearia & Lifestyle Masculino</option>
+                        <option value="academia">Fitness, Yoga & Academias</option>
+                        <option value="outro">Serviços & Negócios Locais</option>
+                      </select>
+                      <div className="absolute right-5 top-5 pointer-events-none text-gray-300">
+                        <Plus className="size-4 rotate-45" />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-gray-900">{t.name}</p>
-                    <p className="text-[11px] text-gray-500">{NICHE_LABELS[t.niche]} — {t.description}</p>
+                </div>
+              </div>
+
+              {/* Secção 2: Engine GitHub */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-2">
+                  <div className="size-1.5 rounded-full bg-[#5CA3FF]" />
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Repositório Cloud</h3>
+                </div>
+
+                <div className="p-8 bg-[#5CA3FF]/5 border border-[#5CA3FF]/10 rounded-[3rem] space-y-5 relative">
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-[#5CA3FF] ml-1 uppercase">GitHub Source (Handle)</label>
+                    <div className="relative">
+                      <GithubIcon className="absolute left-5 top-4.5 size-4 text-[#5CA3FF]/40" />
+                      <input 
+                        name="github_template_repo" 
+                        required 
+                        placeholder="organizacao/nome-do-repo" 
+                        className="w-full pl-12 pr-6 py-4.5 rounded-2xl bg-white border border-[#5CA3FF]/20 focus:ring-8 focus:ring-[#5CA3FF]/5 outline-none transition-all text-sm font-mono text-[#1a1a1a] placeholder:text-gray-300 shadow-sm" 
+                      />
+                    </div>
                   </div>
-                  {selectedTemplate?.id === t.id && (
-                    <Check className="size-4 text-[#5CA3FF] ml-auto shrink-0" />
-                  )}
-                </button>
-              ))}
-              {!templates.length && (
-                <p className="text-gray-400 text-center py-10 text-sm">Nenhum template ativo. Crie um na aba Templates.</p>
+                  
+                  <div className="flex items-start gap-3 bg-white/50 p-4 rounded-2xl border border-[#5CA3FF]/5">
+                    <ShieldCheck className="size-5 text-[#5CA3FF] shrink-0" />
+                    <p className="text-[10px] text-gray-500 leading-relaxed italic">
+                      O motor automático utilizará este repositório como <strong className="text-gray-700">Source of Truth</strong> para gerar os sites dos clientes. Certifique-se de que ele contém o arquivo index.html com os tokens de substituição.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Secção 3: Visualização e Vendas */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <div className="size-1.5 rounded-full bg-[#5CA3FF]" />
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Entrega & Demonstração</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="group space-y-2">
+                  <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">URL de Live Preview</label>
+                  <div className="relative">
+                    <ExternalLink className="absolute left-5 top-4.5 size-4 text-gray-300" />
+                    <input 
+                      name="preview_demo_url" 
+                      placeholder="https://exemplo-modelo.com.br" 
+                      className="w-full pl-12 pr-6 py-4.5 rounded-2xl bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm text-gray-900 shadow-sm" 
+                    />
+                  </div>
+                </div>
+
+                <div className="group space-y-2">
+                  <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">Thumbnail do Template (URL)</label>
+                  <div className="relative">
+                    <Globe className="absolute left-5 top-4.5 size-4 text-gray-300" />
+                    <input 
+                      name="thumbnail_url" 
+                      placeholder="https://link-da-imagem.jpg" 
+                      className="w-full pl-12 pr-6 py-4.5 rounded-2xl bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm text-gray-900 shadow-sm" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="group space-y-2">
+                <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">Notas Estratégicas (Argumentos de Venda)</label>
+                <div className="relative">
+                  <FileText className="absolute left-6 top-6 size-4 text-gray-300" />
+                  <textarea 
+                    name="description" 
+                    rows={4} 
+                    placeholder="Descreva os diferenciais deste modelo para que o time de vendas saiba como oferecê-lo..." 
+                    className="w-full pl-14 pr-8 py-6 rounded-[2.5rem] bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm text-gray-900 resize-none shadow-inner" 
+                  />
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Footer Fixo */}
+          <div className="p-12 bg-gray-50 border-t border-gray-100 flex items-center justify-between shrink-0">
+            <button 
+              type="button" 
+              onClick={() => setOpen(false)} 
+              className="px-8 py-4 text-xs font-black text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-[0.2em]"
+            >
+              Descartar
+            </button>
+            
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="flex items-center gap-3 px-14 py-5 bg-[#5CA3FF] hover:bg-[#4b8ce0] text-white rounded-full font-black text-sm transition-all shadow-[0_20px_40px_-10px_rgba(92,163,255,0.4)] disabled:opacity-50 active:scale-95 uppercase tracking-wider"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" />
+                  Sincronizando...
+                </>
+              ) : (
+                <>
+                  <Plus className="size-5" />
+                  Ativar Template na Fábrica
+                </>
               )}
-            </div>
-          )}
-
-          {/* STEP 2: Identidade */}
-          {step === 'identity' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2 space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Nome da Empresa *</Label>
-                  <Input value={form.company_name} onChange={e => update('company_name', e.target.value)}
-                    placeholder="Pizzaria Bela Napoli" required
-                    className="h-11 bg-gray-50 border-gray-100 rounded-xl" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Slogan</Label>
-                  <Input value={form.slogan} onChange={e => update('slogan', e.target.value)}
-                    placeholder="A melhor pizza da cidade"
-                    className="h-11 bg-gray-50 border-gray-100 rounded-xl" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Nicho *</Label>
-                  <Select value={form.niche} onValueChange={v => update('niche', v)}>
-                    <SelectTrigger className="h-11 bg-gray-50 border-gray-100 rounded-xl w-full">
-                      <SelectValue placeholder="Nicho..." />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-2xl">
-                      {(Object.entries(NICHE_LABELS) as [LabNiche, string][]).map(([k, v]) => (
-                        <SelectItem key={k} value={k}>{v}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Cor Primária</Label>
-                  <div className="flex gap-2">
-                    <input type="color" value={form.corPrimaria}
-                      onChange={e => update('corPrimaria', e.target.value)}
-                      className="h-11 w-14 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer p-1" />
-                    <Input value={form.corPrimaria} onChange={e => update('corPrimaria', e.target.value)}
-                      className="h-11 bg-gray-50 border-gray-100 rounded-xl font-mono text-[13px]" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Cor Secundária</Label>
-                  <div className="flex gap-2">
-                    <input type="color" value={form.corSecundaria}
-                      onChange={e => update('corSecundaria', e.target.value)}
-                      className="h-11 w-14 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer p-1" />
-                    <Input value={form.corSecundaria} onChange={e => update('corSecundaria', e.target.value)}
-                      className="h-11 bg-gray-50 border-gray-100 rounded-xl font-mono text-[13px]" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: Contato */}
-          {step === 'contact' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Telefone</Label>
-                  <Input value={form.telefone} onChange={e => update('telefone', e.target.value)}
-                    placeholder="(11) 9 9999-9999"
-                    className="h-11 bg-gray-50 border-gray-100 rounded-xl" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">WhatsApp</Label>
-                  <Input value={form.numeroWhatsApp} onChange={e => update('numeroWhatsApp', e.target.value)}
-                    placeholder="5511999999999"
-                    className="h-11 bg-gray-50 border-gray-100 rounded-xl" />
-                </div>
-                <div className="col-span-2 space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Endereço</Label>
-                  <Input value={form.endereco} onChange={e => update('endereco', e.target.value)}
-                    placeholder="Rua das Flores, 123 - São Paulo, SP"
-                    className="h-11 bg-gray-50 border-gray-100 rounded-xl" />
-                </div>
-                <div className="col-span-2 space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Link Google Maps</Label>
-                  <Input value={form.urlMaps} onChange={e => update('urlMaps', e.target.value)}
-                    placeholder="https://maps.google.com/..."
-                    className="h-11 bg-gray-50 border-gray-100 rounded-xl" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Instagram</Label>
-                  <Input value={form.instagram} onChange={e => update('instagram', e.target.value)}
-                    placeholder="@pizzariabelanapoli"
-                    className="h-11 bg-gray-50 border-gray-100 rounded-xl" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">E-mail</Label>
-                  <Input value={form.email} onChange={e => update('email', e.target.value)}
-                    placeholder="contato@..."
-                    className="h-11 bg-gray-50 border-gray-100 rounded-xl" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4: Review */}
-          {step === 'review' && (
-            <div className="space-y-4">
-              <div className="p-4 bg-gray-50/60 rounded-2xl space-y-3 text-[13px]">
-                <div className="flex justify-between"><span className="text-gray-500">Template</span><span className="font-medium">{selectedTemplate?.name}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Empresa</span><span className="font-medium">{form.company_name}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Nicho</span><span className="font-medium">{NICHE_LABELS[form.niche as LabNiche] ?? form.niche}</span></div>
-                {form.telefone && <div className="flex justify-between"><span className="text-gray-500">Telefone</span><span className="font-medium">{form.telefone}</span></div>}
-                {form.endereco && <div className="flex justify-between"><span className="text-gray-500">Endereço</span><span className="font-medium text-right text-xs">{form.endereco}</span></div>}
-              </div>
-              <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100">
-                <p className="text-[12px] font-medium text-amber-800">
-                  🔒 O site será gerado em <strong>modo prévia</strong>. Preços embaçados, CTAs bloqueados e banner de demonstração ativo.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer navigation */}
-        <div className="flex gap-3 p-8 pt-4 border-t border-gray-50">
-          {stepIndex > 0 ? (
-            <Button variant="ghost" onClick={() => setStep(STEPS[stepIndex - 1].key)}
-              className="flex-1 rounded-full h-11 border border-gray-100 gap-2">
-              <ChevronLeft className="size-4" /> Voltar
-            </Button>
-          ) : (
-            <Button variant="ghost" onClick={() => setOpen(false)}
-              className="flex-1 rounded-full h-11 border border-gray-100">
-              Cancelar
-            </Button>
-          )}
-
-          {step !== 'review' ? (
-            <Button
-              disabled={!canNext}
-              onClick={() => setStep(STEPS[stepIndex + 1].key)}
-              className="flex-1 bg-[#5CA3FF] hover:bg-[#4b8ce0] text-white rounded-full h-11 gap-2"
-            >
-              Próximo <ChevronRight className="size-4" />
-            </Button>
-          ) : (
-            <Button
-              disabled={isPending}
-              onClick={handleSubmit}
-              className="flex-1 bg-[#5CA3FF] hover:bg-[#4b8ce0] text-white rounded-full h-11 gap-2"
-            >
-              {isPending ? <Loader2 className="animate-spin size-4" /> : <><Rocket className="size-4" /> Gerar Agora</>}
-            </Button>
-          )}
-        </div>
-
+            </button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   )
