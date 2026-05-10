@@ -2,41 +2,42 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, LayoutTemplate } from "lucide-react";
+import { Plus, Box } from "lucide-react";
 import { PreviewsTable } from "./components/previews-table";
-// CORREÇÃO AQUI: Adicionadas as chaves { } em volta do GenerateModal
 import { GenerateModal } from "./components/generate-modal";
 
 export default function PreviewsPage() {
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
+    <div className="flex-1 space-y-8 p-8 bg-[#f8fafc]">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Ambientes Preview</h2>
-          <p className="text-muted-foreground">
-            Gerencie os laboratórios temporários gerados para os clientes.
-          </p>
+          <h2 className="text-4xl font-black text-[#0f172a] tracking-tight">Ambientes Preview</h2>
+          <p className="text-gray-500 font-medium mt-1">Laboratórios temporários instanciados para prospecção.</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button onClick={() => setIsGenerateModalOpen(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Gerar Novo Preview
-          </Button>
-        </div>
+        
+        {/* O BOTÃO VOLTOU: Fixo, vísivel e com estilo premium */}
+        <Button 
+          onClick={() => setIsGenerateModalOpen(true)}
+          className="bg-[#0f172a] hover:bg-black text-white px-8 py-6 rounded-full font-bold shadow-xl gap-3 transition-all hover:scale-105"
+        >
+          <Plus size={20} />
+          Gerar Novo Preview
+        </Button>
       </div>
 
-      {/* Área Principal de Listagem */}
-      <div className="bg-card border rounded-lg shadow-sm overflow-hidden">
-        <div className="p-4 border-b bg-muted/20 flex items-center gap-2">
-          <LayoutTemplate className="w-5 h-5 text-muted-foreground" />
-          <h3 className="font-semibold">Instâncias Ativas</h3>
+      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden min-h-[600px]">
+        <div className="p-8 border-b border-gray-50 bg-gray-50/50 flex items-center gap-3">
+          <Box className="text-gray-400" size={20} />
+          <h3 className="font-bold text-gray-700">Cluster de Instâncias Ativas</h3>
         </div>
+        
+        {/* Tabela de Previews Reais */}
         <PreviewsTable />
       </div>
 
-      {/* Modal Orquestrador de Geração */}
+      {/* Renderiza o Modal Orquestrador passando os controles corretos */}
       {isGenerateModalOpen && (
         <GenerateModal 
           isOpen={isGenerateModalOpen} 

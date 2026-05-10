@@ -1,63 +1,48 @@
-// src/app/(dashboard)/admin/lab/actions/activation.ts
-'use server'
+"use server";
 
-import { createClient } from '@/lib/server'
-import { revalidatePath } from 'next/cache'
-import { updateGithubConfig } from './github'
+import { createClient } from "@/lib/server";
+import { revalidatePath } from "next/cache";
 
-export async function getActivationPreviews() {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('lab_previews')
-    .select('*, lab_templates(name, niche)')
-    .eq('status', 'live')
-    .order('created_at', { ascending: false })
-  if (error) throw new Error(error.message)
-
-  const all = data || []
+export async function getActivationStats() {
+  const supabase = await createClient();
+  
+  const { data: pending } = await supabase.from("lab_previews").select("id").eq("status", "completed").is("activated_at", null);
+  const { data: active } = await supabase.from("lab_previews").select("id").not("activated_at", "is", null);
+  
   return {
-    previews: all.filter(p => p.modo_previa),
-    live:     all.filter(p => !p.modo_previa),
-  }
+    pending: pending?.length || 0,
+    active: active?.length || 0,
+    conversion: active && pending ? Math.round((active.length / (active.length + pending.length)) * 100) : 0
+  };
 }
 
-export async function activateSite(previewId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Não autorizado')
+export async function getPendingActivations() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("lab_previews")
+    .select(`*, lab_templates(name)`)
+    .is("activated_at", null)
+    .order("created_at", { ascending: false });
 
-  await supabase.rpc('activate_lab_preview', { p_preview_id: previewId })
-
-  const { data: preview } = await supabase
-    .from('lab_previews')
-    .select('*')
-    .eq('id', previewId)
-    .single()
-
-  if (preview?.github_repo) {
-    try {
-      const newConfig = {
-        ...preview.config_json,
-        modoPrevia: false,
-        features: preview.features,
-      }
-      await updateGithubConfig(preview.github_repo, newConfig)
-      await supabase
-        .from('lab_previews')
-        .update({ status: 'live', modo_previa: false, activated_at: new Date().toISOString() })
-        .eq('id', previewId)
-    } catch {}
-  }
-
-  revalidatePath('/admin/lab/ativacao')
-  revalidatePath('/admin/lab/previews')
+  if (error) throw error;
+  return data;
 }
 
-export async function deactivateSite(previewId: string) {
-  const supabase = await createClient()
-  await supabase
-    .from('lab_previews')
-    .update({ status: 'deactivated' })
-    .eq('id', previewId)
-  revalidatePath('/admin/lab/ativacao')
+export async function confirmActivation(previewId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { error } = await supabase
+    .from("lab_previews")
+    .update({ 
+      activated_at: new Date().toISOString(),
+      activated_by: user?.id,
+      modo_previa: false 
+    })
+    .eq("id", previewId);
+
+  if (error) return { success: false, error: error.message };
+  
+  revalidatePath("/admin/lab/ativacao");
+  return { success: true };
 }

@@ -5,8 +5,6 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN!
 const GITHUB_ORG   = process.env.GITHUB_ORG || 'facillithub'
 const GH_API       = 'https://api.github.com'
 
-// ─── HELPER HTTP ─────────────────────────────────────────────────────────────
-
 export async function githubFetch(path: string, options?: RequestInit) {
   const res = await fetch(`${GH_API}${path}`, {
     ...options,
@@ -20,140 +18,116 @@ export async function githubFetch(path: string, options?: RequestInit) {
   })
   if (!res.ok) {
     const body = await res.text()
-    throw new Error(`GitHub API Error [${options?.method || 'GET'} ${path}]: ${res.status} — ${body}`)
+    throw new Error(`GitHub API Error [${options?.method || 'GET'} ${path}]: ${res.status} - ${body}`)
   }
   if (res.status === 204) return {}
   return res.json()
 }
 
-// ─── GERAÇÃO DE HTML COM TOKENS ──────────────────────────────────────────────
-
-export async function generateMenuHtml(menuItems: Array<{ nome: string; preco: string; descricao: string }>) {
-   if (!menuItems?.length) return '<p class="empty-menu">Cardápio em atualização...</p>'
+function generateMenuHtml(menuItems: any[]) {
+  if (!menuItems || !menuItems.length) return '<p class="text-center opacity-50 py-10">Cardápio em atualização...</p>';
   return menuItems.map(item => `
     <div class="menu-item reveal">
-      <div class="menu-item-header">
-        <span class="menu-item-name">${item.nome}</span>
-        <span class="menu-item-price">R$ ${item.preco}</span>
+      <div class="menu-item-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span class="menu-item-name" style="font-weight: 700; font-size: 1.1rem;">${item.nome || item.name}</span>
+        <span class="menu-item-price" style="color: var(--color-primary); font-weight: 800;">R$ ${item.preco || item.price}</span>
       </div>
-      <p class="menu-item-desc">${item.descricao}</p>
+      <p class="menu-item-desc" style="font-size: 0.85rem; color: #71717a; line-height: 1.4;">${item.descricao || ''}</p>
     </div>
-  `).join('')
+  `).join('');
 }
 
-// ─── DEPLOY COMPLETO ──────────────────────────────────────────────────────────
-
-export async function deployToGithubPages(
-  templateRepo: string,
-  slug: string,
-  config: Record<string, any>,
-  features: Record<string, boolean>
-): Promise<{ repoName: string; htmlUrl: string; pagesUrl: string }> {
+// ETAPA 1: Criar Repositório
+export async function gh_provisionRepo(templateRepo: string, slug: string) {
   const repoName = `prev-${slug}`
   const cleanTemplate = templateRepo.trim()
     .replace(/^(https?:\/\/)?(www\.)?github\.com\//, '')
     .replace(/\.git$/, '')
 
-  // 1. Fork do template
   await githubFetch(`/repos/${cleanTemplate}/generate`, {
     method: 'POST',
     body: JSON.stringify({
       owner: GITHUB_ORG,
       name: repoName,
-      description: `Facillit Lab — ${config.nomeEmpresa}`,
+      description: `Facillit Lab — Prévia gerada automaticamente`,
       private: false,
       include_all_branches: false,
     }),
   })
 
-  // 2. Polling até repositório ficar disponível (máx 30s)
-  let isReady = false
+  // Polling Robusto: Aguarda o GitHub provisionar (até 30s)
+  let isReady = false;
   for (let i = 0; i < 15; i++) {
     await new Promise(r => setTimeout(r, 2000))
     try {
       await githubFetch(`/repos/${GITHUB_ORG}/${repoName}`)
-      isReady = true
-      break
+      isReady = true; break;
     } catch {}
   }
-  if (!isReady) throw new Error('GitHub Timeout: repositório demorou demais para provisionar.')
-  await new Promise(r => setTimeout(r, 2000))
+  if (!isReady) throw new Error("GitHub Timeout: O repositório demorou demais para ser criado.")
+  await new Promise(r => setTimeout(r, 2000)) // Pausa de segurança
 
-  // 3. Ler index.html do template
+  return repoName;
+}
+
+// ETAPA 2: Injetar Identidade
+export async function gh_injectIdentity(repoName: string, config: any, features: any) {
   const indexData = await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/index.html`)
   let html = Buffer.from(indexData.content, 'base64').toString('utf-8')
 
-  // 4. Substituir tokens
   const tokens: Record<string, string> = {
-    nomeEmpresa:      config.nomeEmpresa      || 'Empresa',
-    slogan:           config.slogan           || 'Excelência garantida',
-    descricao:        config.descricao        || '',
-    corPrimaria:      config.corPrimaria      || '#5CA3FF',
-    corSecundaria:    config.corSecundaria    || '#1A1A2E',
-    fonteTitulo:      config.fonteTitulo      || 'Playfair Display',
-    fonteCorpo:       config.fonteCopo        || 'Inter',
-    telefoneWhatsapp: config.numeroWhatsApp   || '',
-    instagram:        config.instagram        || '',
-    facebook:         config.facebook         || '',
-    endereco:         config.endereco         || '',
-    email:            config.email            || '',
-    urlMaps:          config.urlMaps          || '',
+    nomeEmpresa:      config.nomeEmpresa || "Nova Experiência",
+    slogan:           config.slogan || "Excelência garantida",
+    corPrimaria:      config.corPrimaria || "#5CA3FF",
+    corSecundaria:    config.corSecundaria || "#1A1A2E",
+    fonteTitulo:      config.fonteTitulo || "Playfair Display",
+    fonteCorpo:       config.fonteCopo || "Inter",
+    telefoneWhatsapp: config.numeroWhatsApp || "",
+    instagram:        config.instagram || "",
+    endereco:         config.endereco || "",
     cardapioHtml:     generateMenuHtml(config.cardapio || []),
-    featureFlagsCss: [
-      !features?.menu_list       ? '#menu, #cardapio { display: none !important; }' : '',
-      !features?.booking_form    ? '#reservas, .booking-form { display: none !important; }' : '',
-      !features?.whatsapp_button ? '.whatsapp-float, .btn-whatsapp { display: none !important; }' : '',
-      !features?.google_maps     ? '.map-section, #localizacao iframe { display: none !important; }' : '',
-      !features?.gallery         ? '#galeria, .gallery-section { display: none !important; }' : '',
-      !features?.instagram_feed  ? '.instagram-feed { display: none !important; }' : '',
-    ].filter(Boolean).join('\n'),
+    featureFlagsCss: `
+      ${!features?.menu_list ? '#menu, #cardapio { display: none !important; }' : ''}
+      ${!features?.booking_form ? '#reserva, .booking-form { display: none !important; }' : ''}
+      ${!features?.whatsapp_button ? '.whatsapp-float, .btn-whatsapp { display: none !important; }' : ''}
+    `
   }
 
   for (const [key, val] of Object.entries(tokens)) {
     html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val)
   }
 
-  // 5. Commit do HTML personalizado
+  // Commit do HTML
   await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/index.html`, {
     method: 'PUT',
     body: JSON.stringify({
       message: `🎨 style: identidade de ${tokens.nomeEmpresa} aplicada`,
       content: Buffer.from(html).toString('base64'),
-      sha: indexData.sha,
+      sha: indexData.sha
     }),
   })
 
-  // 6. Commit do config.json
+  // Commit do Config
   const configContent = Buffer.from(JSON.stringify(config, null, 2)).toString('base64')
   try {
     await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/config.json`, {
       method: 'PUT',
-      body: JSON.stringify({ message: 'chore: config inicial', content: configContent }),
+      body: JSON.stringify({ message: 'chore: config inicial sincronizada', content: configContent }),
     })
-  } catch {}
+  } catch (e) {}
 
-  // 7. Ativar GitHub Pages
-  try {
-    await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/pages`, {
-      method: 'POST',
-      body: JSON.stringify({ source: { branch: 'main', path: '/' } }),
-    })
-  } catch {}
+  return true;
+}
+
+// ETAPA 3: Ativar Domínio
+export async function gh_activatePages(repoName: string) {
+  await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/pages`, {
+    method: 'POST',
+    body: JSON.stringify({ source: { branch: 'main', path: '/' } }),
+  })
 
   return {
-    repoName,
     htmlUrl:  `https://github.com/${GITHUB_ORG}/${repoName}`,
     pagesUrl: `https://${GITHUB_ORG}.github.io/${repoName}`,
   }
-}
-
-// ─── UPDATE CONFIG NO REPOSITÓRIO ────────────────────────────────────────────
-
-export async function updateGithubConfig(repoName: string, config: Record<string, any>) {
-  const existing = await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/config.json`)
-  const content  = Buffer.from(JSON.stringify(config, null, 2)).toString('base64')
-  await githubFetch(`/repos/${GITHUB_ORG}/${repoName}/contents/config.json`, {
-    method: 'PUT',
-    body: JSON.stringify({ message: 'chore: update config', content, sha: existing.sha }),
-  })
 }
