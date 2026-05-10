@@ -5,6 +5,7 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-[functions]
-  # Inclui o motor de IA nas funções do servidor para garantir que as dependências sejam resolvidas
-  included_files = ["src/lib/ai-finder.ts"]
+[functions."*"]
+  included_files = [
+    "src/lib/ai-finder.ts"
+  ]s

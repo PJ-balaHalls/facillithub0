@@ -15,8 +15,8 @@ const inter = Inter({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.facillithub.com.br";
-const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-5Z0EL4MRMM";
-const gtmId = process.env.NEXT_PUBLIC_GTM_ID || "GTM-MW8HRRFJ";
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
+const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
 export const viewport: Viewport = {
   width: "device-width",
