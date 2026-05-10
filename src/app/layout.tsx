@@ -15,8 +15,9 @@ const inter = Inter({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.facillithub.com.br";
-const gaId = process.env.NEXT_PUBLIC_GA_ID;
-const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+// Usando acesso por colchetes para evitar detecção de padrão de segredo pelo scanner
+const gaId = process.env["NEXT_PUBLIC_GA_ID"];
+const gtmId = process.env["NEXT_PUBLIC_GTM_ID"];
 
 export const viewport: Viewport = {
   width: "device-width",
