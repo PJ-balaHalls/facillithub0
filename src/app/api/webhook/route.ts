@@ -1,8 +1,3 @@
-/**
- * app/api/webhook/route.ts
- * Processamento robusto de resultados com suporte a Oportunidade Ouro.
- */
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/server'
 import { getRunItems } from '@/lib/apify-finder'
@@ -13,21 +8,13 @@ export const maxDuration = 300
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const runId    = body.runId    || body.resource?.id
-    const status   = body.status   || body.resource?.status
-    
+    const runId = body.runId || body.resource?.id
+    const status = body.status || body.resource?.status
     if (!runId) return NextResponse.json({ error: 'runId ausente' }, { status: 400 })
 
     const supabase = await createClient()
-
-    // Busca a busca pelo run_id, agora incluindo priority_mode
-    const { data: search } = await supabase
-      .from('finder_searches')
-      .select('id, status, priority_mode')
-      .eq('apify_run_id', runId)
-      .single()
-
-    if (!search) return NextResponse.json({ ok: true, message: 'Busca não encontrada' })
+    const { data: search } = await supabase.from('finder_searches').select('*').eq('apify_run_id', runId).single()
+    if (!search) return NextResponse.json({ ok: true })
 
     if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED_OUT') {
       await supabase.from('finder_searches').update({ status: 'failed' }).eq('id', search.id)
@@ -35,28 +22,37 @@ export async function POST(req: NextRequest) {
     }
 
     if (status === 'SUCCEEDED') {
-      // Passamos o search inteiro para o processador usar o priority_mode
       await processSearchResults(supabase, search, runId)
     }
-
     return NextResponse.json({ ok: true })
   } catch (err: any) {
-    console.error('[webhook/error]', err)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
 
+/**
+ * Processa resultados e retorna logs e contagem para o Server Action.
+ */
 export async function processSearchResults(supabase: any, search: any, runId: string) {
-  // Atualiza para processing
+  const logs: string[] = []
+  const addLog = (m: string) => {
+    const time = new Date().toLocaleTimeString('pt-BR')
+    logs.push(`[${time}] ${m}`)
+    console.log(`[finder] ${m}`)
+  }
+
+  addLog(`🔄 Iniciando análise do garimpo: ${search.name}`)
   await supabase.from('finder_searches').update({ status: 'processing' }).eq('id', search.id)
 
   const items = await getRunItems(runId)
+  addLog(`📦 ${items.length} locais encontrados. Iniciando triagem de IA...`)
+
   let totalLeads = 0
 
   for (const item of items) {
     if (!item.title) continue
 
-    // Inserção/Atualização da Empresa
+    // Upsert da Empresa
     const { data: company, error: compErr } = await supabase
       .from('finder_companies')
       .upsert({
@@ -75,30 +71,32 @@ export async function processSearchResults(supabase: any, search: any, runId: st
         has_website:     !!item.website,
         raw_data:        item,
       }, { onConflict: 'search_id,place_id' })
-      .select('id')
-      .single()
+      .select('id').single()
 
     if (compErr || !company) continue
 
-    // Salva Reviews (batch opcional)
-    const reviews = item.reviews || []
-    if (reviews.length > 0) {
-      await supabase.from('finder_reviews').insert(
-        reviews.map((r: any) => ({
-          company_id: company.id, author: r.name, rating: r.stars, text: r.text, published_at: r.publishedAtDate,
-        }))
+    const rawReviews = item.reviews || []
+    const reviewsForAI = rawReviews.map((r: any) => ({ rating: r.stars || 0, text: r.text || '' }))
+
+    // Salva reviews no banco (upsert opcional)
+    if (rawReviews.length > 0) {
+      await supabase.from('finder_reviews').upsert(
+        rawReviews.map((r: any) => ({
+          company_id: company.id, author: r.name, rating: r.stars, text: r.text, published_at: r.publishedAtDate
+        })), { onConflict: 'company_id,author,text' }
       )
     }
 
-    // IA com modo de prioridade
+    // Análise Semântica via IA
     try {
+      addLog(`🧠 Analisando: "${item.title}"...`)
       const analysis = await analyzeCompany({
         name:         item.title,
         rating:       item.totalScore,
         reviewCount:  item.reviewsCount,
         hasWebsite:   !!item.website,
-        reviews:      reviews.map((r: any) => ({ rating: r.stars, text: r.text || '' })),
-        priorityMode: search.priority_mode // <-- Aqui injetamos a inteligência "Ouro"
+        reviews:      reviewsForAI,
+        priorityMode: search.priority_mode
       })
 
       if (analysis.score > 10) {
@@ -113,17 +111,22 @@ export async function processSearchResults(supabase: any, search: any, runId: st
         }, { onConflict: 'company_id' })
 
         totalLeads++
+        addLog(`✅ OPORTUNIDADE! Score: ${analysis.score.toFixed(0)} | ${item.title}`)
+      } else {
+        addLog(`⏭️ Descartado: ${item.title} (Baixa urgência)`)
       }
     } catch (aiErr) {
-      console.error('[IA/Error]', item.title, aiErr)
+      addLog(`❌ Erro IA em ${item.title}`)
     }
   }
 
-  // Finaliza a busca
   await supabase.from('finder_searches').update({
     status: 'completed',
     total_companies: items.length,
     total_leads: totalLeads,
     completed_at: new Date().toISOString()
   }).eq('id', search.id)
+
+  addLog(`🎉 GARIMPO FINALIZADO! ${totalLeads} leads gerados.`)
+  return { totalLeads, logs }
 }

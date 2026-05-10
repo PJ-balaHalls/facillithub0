@@ -2,17 +2,21 @@
 
 import { useState, useTransition, useEffect } from "react"
 import { toast } from "sonner"
-import { Search, MapPin, Settings2, Loader2, Sparkles, Plus, X, Timer } from "lucide-react"
+import { 
+  Search, MapPin, Settings2, Loader2, Sparkles, 
+  Plus, X, Timer, Zap, Layers, ChevronDown, ChevronUp 
+} from "lucide-react"
 import { createSearch } from "../actions"
 
 const TERM_SUGGESTIONS = [
-  "clínica dentária", "restaurante", "oficina mecânica", "salão de beleza",
-  "academia", "farmácia", "padaria", "petshop", "escola de idiomas", "clínica médica",
+  "Clínica Dentária", "Restaurante", "Oficina Mecânica", "Salão de Beleza",
+  "Academia", "Farmácia", "Pet Shop", "Escola de Idiomas", "Clínica Médica",
+  "Imobiliária", "Estética", "Hoteis", "Advocacia", "Contabilidade"
 ]
 
 const REGION_SUGGESTIONS = [
   "São Paulo, SP", "Rio de Janeiro, RJ", "Curitiba, PR", "Belo Horizonte, MG",
-  "Porto Alegre, RS", "Brasília, DF", "Salvador, BA", "Fortaleza, CE",
+  "Porto Alegre, RS", "Brasília, DF", "Campinas, SP", "Guarulhos, SP"
 ]
 
 interface Props {
@@ -21,34 +25,29 @@ interface Props {
 
 export function SearchForm({ onSuccess }: Props) {
   const [open, setOpen]               = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [isPending, startTransition]  = useTransition()
   const [terms, setTerms]             = useState<string[]>([])
   const [regions, setRegions]         = useState<string[]>([])
   const [termInput, setTermInput]     = useState("")
   const [regionInput, setRegionInput] = useState("")
+  const [goldMode, setGoldMode]       = useState(false)
   
-  // Estados para a barra de progresso simulada
   const [progress, setProgress]       = useState(0)
   const [eta, setEta]                 = useState(0)
 
-  // Dispara a animação da barra de progresso quando a requisição iniciar
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (isPending) {
       setProgress(0)
-      setEta(45) // Estimativa de base
-      
+      setEta(45)
       interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 95) return 95
-          return prev + (prev < 80 ? 3 : 0.5) 
-        })
+        setProgress((prev) => (prev >= 95 ? 95 : prev + (prev < 80 ? 3 : 0.5)))
         setEta((prev) => (prev > 0 ? prev - 1 : 0))
       }, 1000)
     } else {
       setProgress(100)
-      setEta(0)
-      setTimeout(() => setProgress(0), 1000) // reseta após o sucesso
+      setTimeout(() => setProgress(0), 1000)
     }
     return () => clearInterval(interval)
   }, [isPending])
@@ -56,38 +55,35 @@ export function SearchForm({ onSuccess }: Props) {
   const addTerm = (val?: string) => {
     const t = (val || termInput).trim()
     if (t && !terms.includes(t)) setTerms(p => [...p, t])
-    if (!val) setTermInput("")
+    setTermInput("")
   }
 
   const addRegion = (val?: string) => {
     const r = (val || regionInput).trim()
     if (r && !regions.includes(r)) setRegions(p => [...p, r])
-    if (!val) setRegionInput("")
+    setRegionInput("")
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (terms.length === 0) return toast.error("Adicione pelo menos 1 termo de busca")
+    if (terms.length === 0) return toast.error("Adicione pelo menos 1 nicho de busca")
 
     const fd = new FormData(e.currentTarget)
     fd.set('searchTerms', terms.join('\n'))
     fd.set('regions',     regions.join('\n'))
+    fd.set('priority_mode', goldMode ? 'gold_opportunity' : 'standard')
 
     startTransition(async () => {
       try {
         const result = await createSearch(fd)
-        toast.success("Operação iniciada com sucesso!", {
-          description: "O robô já está em campo buscando oportunidades.",
+        toast.success(goldMode ? "Operação de OURO Iniciada!" : "Operação iniciada com sucesso!", {
+          description: "O robô já está em campo minerando dados.",
         })
-        
-        // Aguarda um pouco para mostrar a barra em 100% antes de fechar
         setTimeout(() => {
           setOpen(false)
-          setTerms([])
-          setRegions([])
+          setTerms([]); setRegions([]); setGoldMode(false)
           onSuccess?.(result.searchId)
         }, 800)
-
       } catch (err: any) {
         toast.error("Falha ao iniciar busca", { description: err.message })
       }
@@ -98,225 +94,158 @@ export function SearchForm({ onSuccess }: Props) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2.5 px-5 py-2.5 bg-[#5CA3FF] hover:bg-[#4b8ce0]
-          text-white text-[13px] font-medium rounded-full transition-all
-          shadow-sm shadow-blue-500/25 hover:shadow-md hover:shadow-blue-500/30"
+        className="flex items-center gap-2.5 px-6 py-3 bg-[#5CA3FF] hover:bg-blue-600
+          text-white text-[14px] font-bold rounded-full transition-all
+          shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95"
       >
-        <Sparkles className="size-3.5 fill-white" />
-        Nova Busca Finder
+        <Sparkles className="size-4 fill-white" />
+        Lançar Novo Garimpo
       </button>
     )
   }
 
   return (
-    <div className="bg-white border border-gray-100 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-8 py-6 border-b border-gray-50">
+    <div className="bg-white border border-gray-100 rounded-[2.5rem] shadow-[0_12px_40px_rgb(0,0,0,0.04)] overflow-hidden animate-in zoom-in-95 duration-300">
+      <div className="flex items-center justify-between px-8 py-6 border-b border-gray-50 bg-white">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-blue-50 rounded-2xl">
-            <Search strokeWidth={1.5} className="size-5 text-[#5CA3FF]" />
+            <Zap strokeWidth={1.5} className="size-5 text-[#5CA3FF] fill-[#5CA3FF]" />
           </div>
           <div>
-            <h3 className="text-[15px] font-semibold text-gray-900">Configurar Nova Busca</h3>
-            <p className="text-[12px] text-gray-400 mt-0.5">Defina o que e onde garimpar</p>
+            <h3 className="text-[16px] font-bold text-gray-900">Configurar Garimpo</h3>
+            <p className="text-[12px] text-gray-400 mt-0.5">Motores de busca e IA de auditoria</p>
           </div>
         </div>
         <button onClick={() => setOpen(false)} className="p-2 text-gray-400 hover:text-gray-700 rounded-xl hover:bg-gray-50 transition-all">
-          <X className="size-4" />
+          <X className="size-5" />
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-8 space-y-8 relative">
-        {/* Camada de loading bloqueando os inputs com Blur enquanto envia */}
+      <form onSubmit={handleSubmit} className="p-8 space-y-8 relative bg-white">
         {isPending && (
-          <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] flex items-center justify-center p-8 rounded-b-3xl">
-            <div className="w-full max-w-sm bg-white p-6 rounded-2xl border border-gray-100 shadow-xl space-y-4">
-              <div className="flex items-center justify-between text-sm font-semibold text-gray-800">
-                <span className="flex items-center gap-2">
-                  <Loader2 className="size-4 text-[#5CA3FF] animate-spin" />
-                  Conectando motores...
+          <div className="absolute inset-0 z-10 bg-white/70 backdrop-blur-sm flex items-center justify-center p-8 rounded-b-[2.5rem]">
+            <div className="w-full max-w-sm bg-white p-8 rounded-[2rem] border border-gray-100 shadow-2xl space-y-5">
+              <div className="flex items-center justify-between text-sm font-bold text-gray-800">
+                <span className="flex items-center gap-2 italic">
+                  <Loader2 className="size-5 text-[#5CA3FF] animate-spin" />
+                  Sincronizando satélites...
                 </span>
-                <span className="text-[#5CA3FF]">{Math.round(progress)}%</span>
+                <span className="text-[#5CA3FF] font-mono">{Math.round(progress)}%</span>
               </div>
-              
-              {/* Barra nativa em Tailwind */}
               <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-[#5CA3FF] transition-all duration-300 ease-out rounded-full"
-                  style={{ width: `${progress}%` }}
-                />
+                <div className="h-full bg-[#5CA3FF] transition-all duration-300 ease-out rounded-full" style={{ width: `${progress}%` }} />
               </div>
-
-              <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
-                <span className="flex items-center gap-1.5">
-                  <Timer className="size-3.5" /> Tempo estimado
-                </span>
+              <div className="flex items-center justify-between text-[11px] text-gray-400 font-bold uppercase tracking-wider">
+                <span className="flex items-center gap-1.5"><Timer className="size-3.5" /> ETA</span>
                 <span>{eta}s</span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Nome da busca */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
-            Nome da Operação
-          </label>
-          <input
-            name="name"
-            required
-            disabled={isPending}
-            placeholder="Ex: Clínicas SP - Mai/25"
-            className="w-full h-11 px-4 bg-gray-50/50 border border-gray-100 rounded-2xl text-[14px]
-              text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2
-              focus:ring-blue-100 focus:border-[#5CA3FF]/30 transition-all disabled:opacity-50"
-          />
+        {/* Modo Ouro */}
+        <div 
+          className={`p-6 rounded-[2rem] border transition-all cursor-pointer group ${
+            goldMode ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-100 hover:border-amber-100'
+          }`}
+          onClick={() => setGoldMode(!goldMode)}
+        >
+          <div className="flex items-start gap-4">
+            <div className={`mt-1 size-5 rounded-md border flex items-center justify-center transition-all ${goldMode ? 'bg-amber-500 border-amber-500 text-white' : 'bg-white border-gray-300'}`}>
+              {goldMode && <Sparkles className="size-3 fill-current" />}
+            </div>
+            <div className="space-y-1">
+              <label className="text-[14px] font-bold text-amber-900 flex items-center gap-2 cursor-pointer">
+                Oportunidade Ouro
+              </label>
+              <p className="text-[11px] text-amber-700 leading-relaxed">
+                Prioriza empresas com boas avaliações mas que <strong>não possuem infraestrutura digital</strong> (site/redes).
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Termos de busca */}
+        {/* Nome Operação */}
         <div className="space-y-3">
-          <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
-            <Search className="size-3" />
-            Segmentos de Negócio
-          </label>
+          <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 px-1">Identificação do Lote</label>
+          <input name="name" required disabled={isPending} placeholder="Ex: Clínicas Odonto - Zona Sul"
+            className="w-full h-12 px-5 bg-gray-50/50 border border-gray-100 rounded-[1.2rem] text-[14px] text-gray-900 placeholder:text-gray-300 focus:ring-4 focus:ring-blue-50 focus:bg-white transition-all outline-none" />
+        </div>
 
-          {terms.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {terms.map(t => (
-                <span key={t} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-[#5CA3FF] text-[12px] font-medium rounded-full border border-blue-100">
-                  {t}
-                  <button type="button" disabled={isPending} onClick={() => setTerms(p => p.filter(x => x !== t))}>
-                    <X className="size-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <input
-              value={termInput}
-              disabled={isPending}
-              onChange={e => setTermInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTerm())}
-              placeholder="Ex: clínica dentária"
-              className="flex-1 h-10 px-4 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px]
-                text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2
-                focus:ring-blue-100 transition-all disabled:opacity-50"
-            />
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={() => addTerm()}
-              className="px-4 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-[13px] font-medium transition-all disabled:opacity-50"
-            >
-              <Plus className="size-4" />
-            </button>
+        {/* Nichos */}
+        <div className="space-y-4">
+          <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 px-1">Segmentos de Negócio</label>
+          <div className="flex flex-wrap gap-2">
+            {terms.map(t => (
+              <span key={t} className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-[#5CA3FF] text-[12px] font-bold rounded-full border border-blue-100 animate-in zoom-in-95">
+                {t} <button type="button" onClick={() => setTerms(p => p.filter(x => x !== t))} className="hover:text-red-500"><X className="size-3.5" /></button>
+              </span>
+            ))}
           </div>
-
-          <div className="flex flex-wrap gap-1.5">
-            {TERM_SUGGESTIONS.filter(s => !terms.includes(s)).slice(0, 6).map(s => (
-              <button key={s} type="button" disabled={isPending} onClick={() => addTerm(s)}
-                className="px-3 py-1 text-[11px] text-gray-500 border border-gray-200 rounded-full
-                  hover:border-[#5CA3FF]/40 hover:text-[#5CA3FF] hover:bg-blue-50/50 transition-all disabled:opacity-50"
-              >
-                + {s}
-              </button>
+          <div className="flex gap-2">
+            <input value={termInput} onChange={e => setTermInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTerm())}
+              placeholder="Digite um nicho..." className="flex-1 h-12 px-5 bg-gray-50/50 border border-gray-100 rounded-[1.2rem] text-[14px] outline-none focus:bg-white transition-all" />
+            <button type="button" onClick={() => addTerm()} className="p-3 bg-gray-900 text-white rounded-[1.2rem] hover:bg-black transition-all"><Plus /></button>
+          </div>
+          <div className="flex flex-wrap gap-1.5 px-1">
+            {TERM_SUGGESTIONS.filter(s => !terms.includes(s)).slice(0, 8).map(s => (
+              <button key={s} type="button" onClick={() => addTerm(s)} className="px-3 py-1.5 text-[11px] text-gray-500 border border-gray-100 rounded-full hover:bg-gray-50 transition-all">+ {s}</button>
             ))}
           </div>
         </div>
 
         {/* Regiões */}
-        <div className="space-y-3">
-          <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
-            <MapPin className="size-3" />
-            Regiões / Cidades
-            <span className="text-gray-300 normal-case font-normal">(opcional)</span>
-          </label>
-
-          {regions.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {regions.map(r => (
-                <span key={r} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 text-[12px] font-medium rounded-full border border-emerald-100">
-                  <MapPin className="size-2.5" /> {r}
-                  <button type="button" disabled={isPending} onClick={() => setRegions(p => p.filter(x => x !== r))}>
-                    <X className="size-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <input
-              value={regionInput}
-              disabled={isPending}
-              onChange={e => setRegionInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addRegion())}
-              placeholder="Ex: São Paulo, SP"
-              className="flex-1 h-10 px-4 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px]
-                text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2
-                focus:ring-blue-100 transition-all disabled:opacity-50"
-            />
-            <button type="button" disabled={isPending} onClick={() => addRegion()}
-              className="px-4 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-all disabled:opacity-50">
-              <Plus className="size-4" />
-            </button>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5">
-            {REGION_SUGGESTIONS.filter(s => !regions.includes(s)).slice(0, 5).map(s => (
-              <button key={s} type="button" disabled={isPending} onClick={() => addRegion(s)}
-                className="px-3 py-1 text-[11px] text-gray-500 border border-gray-200 rounded-full
-                  hover:border-emerald-400/40 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all disabled:opacity-50"
-              >
-                <MapPin className="size-2.5 inline mr-1" />{s}
-              </button>
+        <div className="space-y-4">
+          <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 px-1">Regiões e Cidades</label>
+          <div className="flex flex-wrap gap-2">
+            {regions.map(r => (
+              <span key={r} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 text-[12px] font-bold rounded-full border border-emerald-100 animate-in zoom-in-95">
+                <MapPin className="size-3" /> {r} <button type="button" onClick={() => setRegions(p => p.filter(x => x !== r))} className="hover:text-red-500"><X className="size-3.5" /></button>
+              </span>
             ))}
           </div>
-        </div>
-
-        {/* Configurações avançadas */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
-              <Settings2 className="size-3" />
-              Máx. Empresas
-            </label>
-            <select name="maxResults" defaultValue="50" disabled={isPending}
-              className="w-full h-10 px-3 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px] text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-50">
-              <option value="20">20 empresas</option>
-              <option value="50">50 empresas</option>
-              <option value="100">100 empresas</option>
-              <option value="200">200 empresas</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
-              Raio de Busca
-            </label>
-            <select name="radiusKm" defaultValue="5" disabled={isPending}
-              className="w-full h-10 px-3 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px] text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:opacity-50">
-              <option value="2">2 km</option>
-              <option value="5">5 km</option>
-              <option value="10">10 km</option>
-              <option value="20">20 km</option>
-              <option value="50">50 km</option>
-            </select>
+          <div className="flex gap-2">
+            <input value={regionInput} onChange={e => setRegionInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addRegion())}
+              placeholder="Digite uma cidade/bairro..." className="flex-1 h-12 px-5 bg-gray-50/50 border border-gray-100 rounded-[1.2rem] text-[14px] outline-none focus:bg-white transition-all" />
+            <button type="button" onClick={() => addRegion()} className="p-3 bg-gray-900 text-white rounded-[1.2rem] hover:bg-black transition-all"><Plus /></button>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-3 pt-2">
-          <button type="button" onClick={() => setOpen(false)} disabled={isPending}
-            className="flex-1 h-12 border border-gray-200 text-gray-600 rounded-full text-[13px] font-medium hover:bg-gray-50 transition-all disabled:opacity-50">
-            Cancelar
+        {/* Configurações Avançadas Toggle */}
+        <div className="pt-2 border-t border-gray-50">
+          <button type="button" onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+            {showAdvanced ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+            Parâmetros de Lote {showAdvanced ? '(Ocultar)' : '(Exibir)'}
           </button>
+          
+          {showAdvanced && (
+            <div className="grid grid-cols-2 gap-4 mt-6 animate-in slide-in-from-top-2">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Volume Máximo</label>
+                <select name="maxResults" defaultValue="20" className="w-full h-11 px-4 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px] outline-none">
+                  <option value="10">10 empresas</option>
+                  <option value="20">20 empresas</option>
+                  <option value="50">50 empresas</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Lote de Análise</label>
+                <select name="batch_size" defaultValue="10" className="w-full h-11 px-4 bg-gray-50/50 border border-gray-100 rounded-xl text-[13px] outline-none">
+                  <option value="5">5 por vez</option>
+                  <option value="10">10 por vez</option>
+                  <option value="20">20 por vez</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Final Actions */}
+        <div className="flex gap-4 pt-4">
+          <button type="button" onClick={() => setOpen(false)} className="flex-1 h-14 border border-gray-200 text-gray-500 rounded-[1.5rem] font-bold text-[14px] hover:bg-gray-50 transition-all">Cancelar</button>
           <button type="submit" disabled={isPending || terms.length === 0}
-            className="flex-1 h-12 bg-[#5CA3FF] hover:bg-[#4b8ce0] disabled:opacity-50 disabled:cursor-not-allowed
-              text-white rounded-full text-[13px] font-medium transition-all shadow-sm shadow-blue-500/20
-              flex items-center justify-center gap-2">
-            <Sparkles className="size-3.5 fill-white" /> Iniciar Garimpo
+            className="flex-[2] h-14 bg-black text-white rounded-[1.5rem] font-bold text-[14px] shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+            <Zap className="size-4 fill-white" /> Iniciar Garimpo Inteligente
           </button>
         </div>
       </form>
