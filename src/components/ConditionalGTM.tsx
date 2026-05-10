@@ -3,13 +3,17 @@
 
 import { usePathname } from "next/navigation";
 
-export default function ConditionalGTM() {
+interface ConditionalGTMProps {
+  gtmId: string;
+}
+
+export default function ConditionalGTM({ gtmId }: ConditionalGTMProps) {
   const pathname = usePathname();
 
-  // Rotas onde o GTM será carregado
+  // Rotas onde o GTM será carregado (ajuste conforme necessário)
   const shouldLoadGTM = pathname === "/" || pathname.startsWith("/client");
 
-  if (!shouldLoadGTM) return null;
+  if (!shouldLoadGTM || !gtmId) return null;
 
   return (
     <>
@@ -20,14 +24,14 @@ export default function ConditionalGTM() {
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MW8HRRFJ');`,
+})(window,document,'script','dataLayer','${gtmId}');`,
         }}
       />
 
       {/* Google Tag Manager (noscript no body) */}
       <noscript
         dangerouslySetInnerHTML={{
-          __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MW8HRRFJ"
+          __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}"
 height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
         }}
       />

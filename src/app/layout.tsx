@@ -222,9 +222,9 @@ export const metadata: Metadata = {
     description:
       "Transformamos negócios locais em empresas digitais prontas para vender.",
     images: ["/og-image.jpg"],
-    // Adicione os handles quando existirem
-    // site: "@facillithub",
-    // creator: "@facillithub",
+    site: "@facillithub",
+  creator: "@facillithub",
+},
   },
 
   // Manifest e ícones
@@ -232,13 +232,6 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
-  },
-
-  // Outras otimizações
-  formatDetection: {
-    telephone: false,
-    email: false,
-    address: false,
   },
 };
 
