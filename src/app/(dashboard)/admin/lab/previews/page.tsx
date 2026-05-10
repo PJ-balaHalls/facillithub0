@@ -21,11 +21,10 @@ export default async function PreviewsPage() {
       .limit(100),
     supabase
       .from('lab_templates')
-      .select('id, name, niche, default_features, default_tokens')
+      .select('id, name, niche, default_features, default_tokens, description')
       .eq('is_active', true),
   ])
 
-  // Stats por status
   const statsByStatus = (previews ?? []).reduce((acc, p) => {
     acc[p.status as LabDeploymentStatus] = (acc[p.status as LabDeploymentStatus] ?? 0) + 1
     return acc
@@ -34,7 +33,6 @@ export default async function PreviewsPage() {
   return (
     <div className="flex flex-col w-full max-w-[1400px] mx-auto pb-20 mt-2 animate-in fade-in duration-700">
 
-      {/* Header */}
       <section className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -48,6 +46,7 @@ export default async function PreviewsPage() {
           </p>
         </div>
 
+        {/* Uso correto do componente importado */}
         <GenerateModal templates={templates ?? []}>
           <button className="flex items-center gap-2 px-5 py-2.5 bg-[#5CA3FF] hover:bg-[#4b8ce0] text-white text-[13px] font-medium rounded-full transition shadow-sm shadow-blue-500/20">
             <Zap className="size-3.5 fill-white" /> Gerar Prévia
@@ -55,7 +54,6 @@ export default async function PreviewsPage() {
         </GenerateModal>
       </section>
 
-      {/* Status cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10">
         {(Object.entries(STATUS_CONFIG) as [LabDeploymentStatus, typeof STATUS_CONFIG[LabDeploymentStatus]][]).map(([status, cfg]) => (
           <div key={status} className="p-4 rounded-2xl bg-white border border-gray-100 shadow-sm">
@@ -67,7 +65,6 @@ export default async function PreviewsPage() {
         ))}
       </div>
 
-      {/* Tabela de previews */}
       <Suspense fallback={<Skeleton className="h-96 w-full rounded-3xl" />}>
         <div className="bg-white border border-gray-100 rounded-[2.5rem] overflow-hidden shadow-sm">
           <PreviewsTable initialPreviews={previews ?? []} />

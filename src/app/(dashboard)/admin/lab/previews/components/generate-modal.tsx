@@ -1,256 +1,222 @@
-// src/app/(dashboard)/admin/lab/templates/components/create-template-modal.tsx
+// src/app/(dashboard)/admin/lab/previews/components/generate-modal.tsx
 "use client"
 
-import { useState } from "react"
+import React, { useState, useTransition } from "react"
+import { generatePreview } from "../../../lab/actions"
+import type { LabTemplate, LabNiche, ConfigJson } from "@/types/lab"
+import { NICHE_LABELS } from "@/types/lab"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { createTemplate } from "../../actions"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { 
-  Globe, 
-  Tag, 
-  FileText, 
-  Loader2, 
-  Plus, 
-  Info, 
-  Layout, 
-  ExternalLink, 
-  Settings2, 
-  ShieldCheck 
-} from "lucide-react"
 
-/**
- * Ícone do GitHub definido manualmente para evitar erro de exportação do lucide-react
- */
-function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.2c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-      <path d="M9 18c-4.51 2-5-2-7-2" />
-    </svg>
-  )
+// ÍCONES MANUAIS PARA EVITAR ERRO DE BUILD DO LUCIDE
+const IconRocket = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 22 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-5c1.62-2.2 5-3 5-3"/><path d="M12 15v5s3.03-.55 5-2c2.2-1.62 3-5 3-5"/></svg>
+const IconCheck = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+const IconNext = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+const IconBack = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+const IconLoader = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+
+interface Props {
+  templates: LabTemplate[]
+  children: React.ReactNode
 }
 
-export function CreateTemplateModal({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+type Step = 'template' | 'identity' | 'contact' | 'review'
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setLoading(true)
-    
-    const formData = new FormData(e.currentTarget)
-    const data = Object.fromEntries(formData.entries())
+const STEPS: { key: Step; label: string }[] = [
+  { key: 'template',  label: 'Template' },
+  { key: 'identity',  label: 'Identidade' },
+  { key: 'contact',   label: 'Contato' },
+  { key: 'review',    label: 'Revisão' },
+]
 
-    try {
-      const res = await createTemplate(data)
-      if (res.success) {
-        toast.success("Template mestre configurado com sucesso!")
-        setOpen(false)
-      } else {
-        toast.error("Erro ao salvar no banco: " + res.error)
-      }
-    } catch (err) {
-      toast.error("Erro crítico na comunicação com o servidor de infraestrutura.")
-    } finally {
-      setLoading(false)
+export function GenerateModal({ templates, children }: Props) {
+  const [open, setOpen]               = useState(false)
+  const [step, setStep]               = useState<Step>('template')
+  const [selectedTemplate, setTpl]    = useState<LabTemplate | null>(null)
+  const [isPending, startTransition]  = useTransition()
+
+  const [form, setForm] = useState({
+    company_name:   '',
+    niche:          '' as LabNiche | '',
+    slogan:         '',
+    corPrimaria:    '#5CA3FF',
+    corSecundaria:  '#1A1A2E',
+    telefone:       '',
+    numeroWhatsApp: '',
+    instagram:      '',
+    endereco:       '',
+  })
+
+  const update = (k: keyof typeof form, v: string) => setForm(p => ({ ...p, [k]: v }))
+
+  const stepIndex = STEPS.findIndex(s => s.key === step)
+  const canNext   = step === 'template'  ? !!selectedTemplate :
+                    step === 'identity'  ? !!form.company_name && !!form.niche :
+                    step === 'contact'   ? true : false
+
+  const handleSubmit = () => {
+    if (!selectedTemplate) return
+
+    const config: ConfigJson = {
+      nomeEmpresa:    form.company_name,
+      slogan:         form.slogan || undefined,
+      corPrimaria:    form.corPrimaria,
+      corSecundaria:  form.corSecundaria,
+      fonteTitulo:    selectedTemplate.default_tokens?.fonteTitulo ?? 'Playfair Display',
+      fonteCopo:      selectedTemplate.default_tokens?.fonteCopo ?? 'Inter',
+      numeroWhatsApp: form.numeroWhatsApp || undefined,
+      instagram:      form.instagram || undefined,
+      endereco:       form.endereco || undefined,
+      modoPrevia:     true,
+      features:       selectedTemplate.default_features,
     }
+
+    startTransition(async () => {
+      try {
+        await generatePreview({
+          template_id:  selectedTemplate.id,
+          company_name: form.company_name,
+          niche:        form.niche as LabNiche,
+          config,
+        })
+        toast.success('Prévia em geração! O motor do Lab foi disparado.')
+        setOpen(false)
+        setStep('template')
+      } catch (err: any) {
+        toast.error('Erro na geração: ' + err.message)
+      }
+    })
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setStep('template') }}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[800px] rounded-[3.5rem] p-0 overflow-hidden border-none shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] bg-white">
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          
-          {/* Header Ultrapremium - Lab Factory Identity */}
-          <div className="bg-[#0a0a0a] p-12 text-white relative overflow-hidden shrink-0">
-            <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
-              <Layout className="size-48 rotate-12" />
+      <DialogContent className="bg-white rounded-[2rem] border-none shadow-2xl sm:max-w-xl p-0 overflow-hidden">
+        
+        <div className="p-8 pb-0">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2.5 bg-blue-50 rounded-2xl border border-blue-100 text-[#5CA3FF]">
+                <IconRocket />
+              </div>
+              <DialogTitle className="text-lg font-semibold tracking-tight">Gerar Site de Luxo</DialogTitle>
             </div>
-            <DialogHeader className="relative z-10">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-[#5CA3FF]/20 rounded-2xl border border-white/5">
-                  <Layout className="size-8 text-[#5CA3FF]" />
+          </DialogHeader>
+
+          <div className="flex items-center gap-2 mb-8">
+            {STEPS.map((s, i) => (
+              <div key={s.key} className="flex items-center gap-2">
+                <div className={`flex items-center justify-center size-6 rounded-full text-[11px] font-bold transition-colors ${
+                  i <= stepIndex ? 'bg-[#5CA3FF] text-white' : 'bg-gray-100 text-gray-400'
+                }`}>
+                  {i < stepIndex ? <IconCheck /> : i + 1}
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#5CA3FF]">Lab Factory v2.0</span>
-                  <DialogTitle className="text-3xl font-bold tracking-tight mt-1">Configurar Template Mestre</DialogTitle>
-                </div>
+                <span className={`text-[12px] font-medium ${i === stepIndex ? 'text-gray-900' : 'text-gray-400'}`}>
+                  {s.label}
+                </span>
+                {i < STEPS.length - 1 && <div className="w-4 h-[1px] bg-gray-100 mx-1" />}
               </div>
-              <p className="text-gray-400 text-sm font-light max-w-lg leading-relaxed">
-                Registre o repositório base que servirá de semente para clonagem e injeção dinâmica de conteúdo para seus novos clientes.
-              </p>
-            </DialogHeader>
+            ))}
           </div>
+        </div>
 
-          {/* Form Content - Scrolável */}
-          <div className="p-12 space-y-12 max-h-[60vh] overflow-y-auto custom-scrollbar bg-white">
-            
-            {/* Secção 1: Classificação Comercial */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <div className="size-1.5 rounded-full bg-[#5CA3FF]" />
-                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Identificação</h3>
-                </div>
-                
-                <div className="space-y-5">
-                  <div className="group space-y-2">
-                    <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">Nome Público do Modelo</label>
-                    <div className="relative">
-                      <Tag className="absolute left-5 top-4.5 size-4 text-gray-300 group-focus-within:text-[#5CA3FF] transition-colors" />
-                      <input 
-                        name="name" 
-                        required 
-                        placeholder="Ex: Ultrapremium Restaurante v2" 
-                        className="w-full pl-12 pr-6 py-4.5 rounded-2xl bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm font-medium text-gray-900" 
-                      />
-                    </div>
+        <div className="px-8 pb-4 min-h-[350px]">
+          {step === 'template' && (
+            <div className="space-y-3">
+              <p className="text-[13px] font-medium text-gray-700 mb-4">Selecione o motor base:</p>
+              {templates.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => { setTpl(t); update('niche', t.niche) }}
+                  className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
+                    selectedTemplate?.id === t.id ? 'border-[#5CA3FF] bg-blue-50/30' : 'border-gray-100 hover:border-gray-200 bg-white'
+                  }`}
+                >
+                  <div className="size-10 rounded-xl bg-gray-100 flex items-center justify-center text-xl">🏗</div>
+                  <div className="flex-1">
+                    <p className="text-[13px] font-bold text-gray-900">{t.name}</p>
+                    <p className="text-[11px] text-gray-500">{NICHE_LABELS[t.niche]} — {t.description}</p>
                   </div>
+                </button>
+              ))}
+            </div>
+          )}
 
-                  <div className="group space-y-2">
-                    <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">Nicho de Mercado</label>
-                    <div className="relative">
-                      <Settings2 className="absolute left-5 top-4.5 size-4 text-gray-300" />
-                      <select 
-                        name="niche" 
-                        className="w-full pl-12 pr-10 py-4.5 rounded-2xl bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm font-medium appearance-none text-gray-900 cursor-pointer"
-                      >
-                        <option value="restaurante">Gastronomia & Restaurantes</option>
-                        <option value="clinica">Saúde & Clínicas Médicas</option>
-                        <option value="salao_beleza">Estética & Centros de Beleza</option>
-                        <option value="barbearia">Barbearia & Lifestyle Masculino</option>
-                        <option value="academia">Fitness, Yoga & Academias</option>
-                        <option value="outro">Serviços & Negócios Locais</option>
-                      </select>
-                      <div className="absolute right-5 top-5 pointer-events-none text-gray-300">
-                        <Plus className="size-4 rotate-45" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          {step === 'identity' && (
+            <div className="space-y-4 animate-in slide-in-from-right-2">
+              <div className="space-y-2">
+                <Label className="text-[11px] font-bold text-gray-400 uppercase">Nome da Empresa</Label>
+                <Input value={form.company_name} onChange={e => update('company_name', e.target.value)} placeholder="Ex: Pizzaria Napoli" className="h-11 rounded-xl bg-gray-50 border-gray-100" />
               </div>
-
-              {/* Secção 2: Engine GitHub */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <div className="size-1.5 rounded-full bg-[#5CA3FF]" />
-                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Repositório Cloud</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-bold text-gray-400 uppercase">Nicho</Label>
+                  <Select value={form.niche} onValueChange={v => update('niche', v as LabNiche)}>
+                    <SelectTrigger className="h-11 rounded-xl bg-gray-50 border-gray-100"><SelectValue /></SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      {Object.entries(NICHE_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                <div className="p-8 bg-[#5CA3FF]/5 border border-[#5CA3FF]/10 rounded-[3rem] space-y-5 relative">
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-[#5CA3FF] ml-1 uppercase">GitHub Source (Handle)</label>
-                    <div className="relative">
-                      <GithubIcon className="absolute left-5 top-4.5 size-4 text-[#5CA3FF]/40" />
-                      <input 
-                        name="github_template_repo" 
-                        required 
-                        placeholder="organizacao/nome-do-repo" 
-                        className="w-full pl-12 pr-6 py-4.5 rounded-2xl bg-white border border-[#5CA3FF]/20 focus:ring-8 focus:ring-[#5CA3FF]/5 outline-none transition-all text-sm font-mono text-[#1a1a1a] placeholder:text-gray-300 shadow-sm" 
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 bg-white/50 p-4 rounded-2xl border border-[#5CA3FF]/5">
-                    <ShieldCheck className="size-5 text-[#5CA3FF] shrink-0" />
-                    <p className="text-[10px] text-gray-500 leading-relaxed italic">
-                      O motor automático utilizará este repositório como <strong className="text-gray-700">Source of Truth</strong> para gerar os sites dos clientes. Certifique-se de que ele contém o arquivo index.html com os tokens de substituição.
-                    </p>
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-bold text-gray-400 uppercase">Cor Primária</Label>
+                  <div className="flex gap-2">
+                    <input type="color" value={form.corPrimaria} onChange={e => update('corPrimaria', e.target.value)} className="h-11 w-12 rounded-xl cursor-pointer p-1 bg-gray-50 border border-gray-100" />
+                    <Input value={form.corPrimaria} onChange={e => update('corPrimaria', e.target.value)} className="h-11 font-mono text-xs rounded-xl" />
                   </div>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Secção 3: Visualização e Vendas */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <div className="size-1.5 rounded-full bg-[#5CA3FF]" />
-                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Entrega & Demonstração</h3>
+          {step === 'contact' && (
+            <div className="space-y-4 animate-in slide-in-from-right-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2"><Label className="text-[11px] font-bold">WhatsApp</Label><Input value={form.numeroWhatsApp} onChange={e => update('numeroWhatsApp', e.target.value)} placeholder="55119..." className="h-11 rounded-xl" /></div>
+                <div className="space-y-2"><Label className="text-[11px] font-bold">Instagram</Label><Input value={form.instagram} onChange={e => update('instagram', e.target.value)} placeholder="@perfil" className="h-11 rounded-xl" /></div>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="group space-y-2">
-                  <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">URL de Live Preview</label>
-                  <div className="relative">
-                    <ExternalLink className="absolute left-5 top-4.5 size-4 text-gray-300" />
-                    <input 
-                      name="preview_demo_url" 
-                      placeholder="https://exemplo-modelo.com.br" 
-                      className="w-full pl-12 pr-6 py-4.5 rounded-2xl bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm text-gray-900 shadow-sm" 
-                    />
-                  </div>
-                </div>
+              <div className="space-y-2"><Label className="text-[11px] font-bold">Endereço Público</Label><Input value={form.endereco} onChange={e => update('endereco', e.target.value)} placeholder="Rua das Flores, 123" className="h-11 rounded-xl" /></div>
+            </div>
+          )}
 
-                <div className="group space-y-2">
-                  <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">Thumbnail do Template (URL)</label>
-                  <div className="relative">
-                    <Globe className="absolute left-5 top-4.5 size-4 text-gray-300" />
-                    <input 
-                      name="thumbnail_url" 
-                      placeholder="https://link-da-imagem.jpg" 
-                      className="w-full pl-12 pr-6 py-4.5 rounded-2xl bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm text-gray-900 shadow-sm" 
-                    />
-                  </div>
-                </div>
+          {step === 'review' && (
+            <div className="space-y-6 animate-in zoom-in-95">
+              <div className="p-6 bg-gray-50 rounded-[2rem] space-y-3 text-sm">
+                <div className="flex justify-between"><span>Template Base</span><span className="font-bold text-[#5CA3FF]">{selectedTemplate?.name}</span></div>
+                <div className="flex justify-between"><span>Nome do Site</span><span className="font-bold text-gray-900">{form.company_name}</span></div>
+                <div className="flex justify-between"><span>Nicho</span><span className="font-bold">{NICHE_LABELS[form.niche as LabNiche]}</span></div>
               </div>
-
-              <div className="group space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 ml-1 group-focus-within:text-[#5CA3FF] transition-colors uppercase">Notas Estratégicas (Argumentos de Venda)</label>
-                <div className="relative">
-                  <FileText className="absolute left-6 top-6 size-4 text-gray-300" />
-                  <textarea 
-                    name="description" 
-                    rows={4} 
-                    placeholder="Descreva os diferenciais deste modelo para que o time de vendas saiba como oferecê-lo..." 
-                    className="w-full pl-14 pr-8 py-6 rounded-[2.5rem] bg-gray-50 border border-gray-100 focus:bg-white focus:ring-4 focus:ring-[#5CA3FF]/10 outline-none transition-all text-sm text-gray-900 resize-none shadow-inner" 
-                  />
-                </div>
+              <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex gap-3 text-amber-800 text-[11px] leading-relaxed">
+                <div className="shrink-0 text-amber-500">⚠️</div>
+                <p>O site será gerado em <strong>MODO PRÉVIA</strong>. Preços embaçados e CTAs bloqueados para garantir o fechamento da venda pelo administrador.</p>
               </div>
             </div>
+          )}
+        </div>
 
-          </div>
+        <div className="flex gap-3 p-8 pt-4 border-t border-gray-50">
+          {stepIndex > 0 ? (
+            <Button variant="ghost" onClick={() => setStep(STEPS[stepIndex - 1].key)} className="flex-1 rounded-full h-12 border border-gray-100 gap-2">
+              <IconBack /> Voltar
+            </Button>
+          ) : (
+            <Button variant="ghost" onClick={() => setOpen(false)} className="flex-1 rounded-full h-12 border border-gray-100">Cancelar</Button>
+          )}
 
-          {/* Footer Fixo */}
-          <div className="p-12 bg-gray-50 border-t border-gray-100 flex items-center justify-between shrink-0">
-            <button 
-              type="button" 
-              onClick={() => setOpen(false)} 
-              className="px-8 py-4 text-xs font-black text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-[0.2em]"
-            >
-              Descartar
-            </button>
-            
-            <button 
-              type="submit" 
-              disabled={loading} 
-              className="flex items-center gap-3 px-14 py-5 bg-[#5CA3FF] hover:bg-[#4b8ce0] text-white rounded-full font-black text-sm transition-all shadow-[0_20px_40px_-10px_rgba(92,163,255,0.4)] disabled:opacity-50 active:scale-95 uppercase tracking-wider"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="size-5 animate-spin" />
-                  Sincronizando...
-                </>
-              ) : (
-                <>
-                  <Plus className="size-5" />
-                  Ativar Template na Fábrica
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+          {step !== 'review' ? (
+            <Button disabled={!canNext} onClick={() => setStep(STEPS[stepIndex + 1].key)} className="flex-1 bg-[#5CA3FF] hover:bg-[#4b8ce0] text-white rounded-full h-12 gap-2 shadow-lg shadow-blue-500/20">
+              Próximo <IconNext />
+            </Button>
+          ) : (
+            <Button disabled={isPending} onClick={handleSubmit} className="flex-1 bg-[#5CA3FF] hover:bg-[#4b8ce0] text-white rounded-full h-12 gap-3 shadow-xl shadow-blue-500/30 font-bold">
+              {isPending ? <IconLoader /> : <><IconRocket /> GERAR AGORA</>}
+            </Button>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )
