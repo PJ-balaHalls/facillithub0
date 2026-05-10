@@ -141,14 +141,16 @@ const jsonLdSoftware = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={inter.variable} suppressHydrationWarning>
-      <head>
+      <head suppressHydrationWarning>
         <link rel="dns-prefetch" href="//www.googletagmanager.com" />
         <link rel="preconnect" href="//www.googletagmanager.com" crossOrigin="anonymous" />
+      </head>
+      <body className={inter.className} suppressHydrationWarning>
+        {/* Scripts transferidos para o body para evitar quebra de hidratação por causa de extensões Chrome */}
         <script id="jsonld-org" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }} />
         <script id="jsonld-web" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }} />
         <script id="jsonld-soft" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSoftware) }} />
-      </head>
-      <body className={inter.className} suppressHydrationWarning>
+        
         <ConditionalGTM gtmId={gtmId} />
 
         {children}

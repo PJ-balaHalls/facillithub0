@@ -1,6 +1,6 @@
 // src/app/(dashboard)/admin/lab/templates/page.tsx
 import { createClient } from '@/lib/server'
-import { Suspense } from 'next'
+import { Suspense } from 'react' // CORRIGIDO: O Suspense vem do 'react' e não do 'next'
 import { TemplatesList } from './components/templates-list'
 import { CreateTemplateModal } from './components/create-template-modal'
 import { Layers, Plus } from 'lucide-react'
