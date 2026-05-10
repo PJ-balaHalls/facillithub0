@@ -1,53 +1,56 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TemplateCard } from "./template-card";
+import { getTemplates } from "../../actions/templates";
+import { Loader2 } from "lucide-react";
 
-// Mock de dados para os templates
+// Tipagem exata baseada na sua tabela lab_templates
 export type TemplateBase = {
   id: string;
   name: string;
   description: string;
-  repoUrl: string;
-  category: string;
-  status: "ready" | "syncing" | "error";
-  lastUpdate: string;
+  github_template_repo: string;
+  niche: string;
+  is_active: boolean;
+  updated_at: string;
 };
 
-const mockTemplates: TemplateBase[] = [
-  {
-    id: "delivery-v1",
-    name: "Delivery Express",
-    description: "Template otimizado para lanchonetes e pizzarias, com carrinho de compras nativo.",
-    repoUrl: "facillithub/tpl-delivery-v1",
-    category: "Food",
-    status: "ready",
-    lastUpdate: "Atualizado há 2 dias",
-  },
-  {
-    id: "health-clinic",
-    name: "Clínica Saúde Base",
-    description: "Landing page para consultórios com integração de agendamento via WhatsApp.",
-    repoUrl: "facillithub/tpl-health-clinic",
-    category: "Saúde",
-    status: "syncing",
-    lastUpdate: "Sincronizando...",
-  },
-  {
-    id: "barber-shop",
-    name: "Barbearia Pro",
-    description: "Sistema para barbearias com vitrine de cortes e controle de profissionais.",
-    repoUrl: "facillithub/tpl-barber-shop",
-    category: "Beleza",
-    status: "ready",
-    lastUpdate: "Atualizado há 1 mês",
-  }
-];
-
 export function TemplateGrid() {
+  const [templates, setTemplates] = useState<TemplateBase[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTemplates() {
+      const res = await getTemplates();
+      if (res.success) {
+        setTemplates(res.data);
+      }
+      setIsLoading(false);
+    }
+    
+    fetchTemplates();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12 text-muted-foreground w-full">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (templates.length === 0) {
+    return (
+      <div className="p-12 text-center border border-dashed rounded-lg text-muted-foreground bg-muted/20 w-full">
+        Nenhum template base cadastrado. Clique em "Adicionar Template" para começar.
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {mockTemplates.map((template) => (
+      {templates.map((template) => (
         <TemplateCard key={template.id} template={template} />
       ))}
     </div>

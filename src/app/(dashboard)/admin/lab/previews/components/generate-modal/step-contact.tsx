@@ -2,7 +2,8 @@
 
 import React from "react";
 import { GenerateFormData } from "./index";
-import { SocialLinksEditor } from "../../../../_components/social-links-editor";
+// Correção: Voltando apenas 3 níveis
+import { SocialLinksEditor } from "../../../_components/social-links-editor";
 
 interface StepProps {
   data: GenerateFormData;

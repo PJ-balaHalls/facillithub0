@@ -2,8 +2,9 @@
 
 import React from "react";
 import { GenerateFormData } from "./index";
-import { ColorPicker } from "../../../../_components/color-picker";
-import { ImageUpload } from "../../../../_components/image-upload";
+// Correção: Voltando apenas 3 níveis (../../../) para achar a _components
+import { ColorPicker } from "../../../_components/color-picker";
+import { ImageUpload } from "../../../_components/image-upload";
 import { Label } from "@/components/ui/label";
 
 interface StepProps {

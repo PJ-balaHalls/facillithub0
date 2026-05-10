@@ -18,6 +18,7 @@ import {
   ShieldCheck 
 } from "lucide-react"
 
+// Ícone SVG Customizado do Github
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

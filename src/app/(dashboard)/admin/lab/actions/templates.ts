@@ -1,98 +1,55 @@
-// src/app/(dashboard)/admin/lab/actions/templates.ts
-'use server'
+"use server";
 
-import { createClient } from '@/lib/server'
-import { revalidatePath } from 'next/cache'
+import { createClient } from "@/lib/server"; // Ajuste se o seu import do Supabase for diferente
+import { revalidatePath } from "next/cache";
 
-export async function checkEnvStatus() {
-  return {
-    GITHUB_TOKEN: !!process.env.GITHUB_TOKEN,
-    GITHUB_ORG:   !!process.env.GITHUB_ORG,
-    SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-    LAB_URL:      !!process.env.NEXT_PUBLIC_LAB_BASE_URL,
+// 1. Função que já criámos para listar os templates
+export async function getTemplates() {
+  try {
+    const supabase = await createClient();
+    
+    const { data, error } = await supabase
+      .from("lab_templates")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("Erro ao buscar templates:", error);
+    return { success: false, data: [], error: error.message };
   }
 }
 
-export async function getTemplates() {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('lab_templates')
-    .select('*')
-    .order('created_at', { ascending: false })
-  if (error) throw new Error(error.message)
-  return data || []
-}
+// 2. NOVA FUNÇÃO: Para criar um template através do Modal Factory V2
+export async function createTemplate(formData: Record<string, any>) {
+  try {
+    const supabase = await createClient();
 
-export async function getActiveTemplates() {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('lab_templates')
-    .select('id, name, niche, default_features, default_tokens, description')
-    .eq('is_active', true)
-  return data || []
-}
+    // Mapeamos os dados vindos do form para as colunas exatas da sua tabela lab_templates
+    const insertData = {
+      name: formData.name,
+      niche: formData.niche,
+      github_template_repo: formData.github_template_repo,
+      preview_demo_url: formData.preview_demo_url || null,
+      thumbnail_url: formData.thumbnail_url || null,
+      description: formData.description || null,
+      is_active: true, // Por padrão entra como ativo
+    };
 
-export async function createTemplate(formData: any) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Não autorizado' }
+    const { error } = await supabase
+      .from("lab_templates")
+      .insert(insertData);
 
-  const { error } = await supabase.from('lab_templates').insert({
-    name:                 formData.name,
-    niche:                formData.niche,
-    description:          formData.description,
-    github_template_repo: formData.github_template_repo,
-    thumbnail_url:        formData.thumbnail_url || null,
-    preview_demo_url:     formData.preview_demo_url || null,
-    created_by:           user.id,
-    is_active:            true,
-    default_features: {
-      whatsapp_button: true,
-      booking_form:    true,
-      menu_list:       true,
-      seo_schema:      true,
-      google_maps:     true,
-      gallery:         false,
-      instagram_feed:  false,
-      carousel:        false,
-    },
-    default_tokens: {
-      fonteTitulo: formData.fonteTitulo || 'Playfair Display',
-      fonteCopo:   formData.fonteCopo   || 'Inter',
-    },
-  })
+    if (error) throw error;
 
-  if (error) return { success: false, error: error.message }
-  revalidatePath('/admin/lab/templates')
-  return { success: true }
-}
+    // Atualiza a cache da página para o novo template aparecer no grid instantaneamente
+    revalidatePath("/admin/lab/templates");
 
-export async function updateTemplate(id: string, data: Partial<{
-  name: string
-  description: string
-  thumbnail_url: string
-  preview_demo_url: string
-  default_features: Record<string, boolean>
-  default_tokens: Record<string, string>
-}>) {
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('lab_templates')
-    .update(data)
-    .eq('id', id)
-  if (error) throw new Error(error.message)
-  revalidatePath('/admin/lab/templates')
-}
-
-export async function toggleTemplateStatus(id: string, is_active: boolean) {
-  const supabase = await createClient()
-  await supabase.from('lab_templates').update({ is_active }).eq('id', id)
-  revalidatePath('/admin/lab/templates')
-}
-
-export async function deleteTemplate(id: string) {
-  const supabase = await createClient()
-  const { error } = await supabase.from('lab_templates').delete().eq('id', id)
-  if (error) throw new Error(error.message)
-  revalidatePath('/admin/lab/templates')
+    return { success: true };
+  } catch (error: any) {
+    console.error("Erro ao criar template:", error);
+    return { success: false, error: error.message || "Falha ao gravar no banco de dados." };
+  }
 }

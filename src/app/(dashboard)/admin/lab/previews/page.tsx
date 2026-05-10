@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutTemplate } from "lucide-react";
 import { PreviewsTable } from "./components/previews-table";
-import GenerateModal from "./components/generate-modal"; // Assumindo export default no seu index.tsx do modal
+// CORREÇÃO AQUI: Adicionadas as chaves { } em volta do GenerateModal
+import { GenerateModal } from "./components/generate-modal";
 
 export default function PreviewsPage() {
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);

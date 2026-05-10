@@ -1,14 +1,16 @@
+// src/app/(dashboard)/admin/lab/templates/page.tsx
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { TemplateGrid } from "./components/template-grid";
 import { EnvStatusPanel } from "./components/env-status-panel";
-import CreateTemplateModal from "./components/create-modal"; // O index.tsx do modal
+// 1. Atualizamos a importação para o ficheiro correto
+import { CreateTemplateModal } from "./components/create-template-modal";
 
 export default function TemplatesPage() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // 2. Removemos o estado isCreateModalOpen, pois o novo modal gere-se a si próprio
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">
@@ -20,10 +22,13 @@ export default function TemplatesPage() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Adicionar Template
-          </Button>
+          {/* 3. O modal agora envolve o botão que serve de gatilho (Trigger) */}
+          <CreateTemplateModal>
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" />
+              Adicionar Template
+            </Button>
+          </CreateTemplateModal>
         </div>
       </div>
 
@@ -38,14 +43,6 @@ export default function TemplatesPage() {
           <EnvStatusPanel />
         </div>
       </div>
-
-      {/* Modal Orquestrador de Criação de Template */}
-      {isCreateModalOpen && (
-        <CreateTemplateModal 
-          isOpen={isCreateModalOpen} 
-          onClose={() => setIsCreateModalOpen(false)} 
-        />
-      )}
     </div>
   );
 }

@@ -28,8 +28,8 @@ export async function githubFetch(path: string, options?: RequestInit) {
 
 // ─── GERAÇÃO DE HTML COM TOKENS ──────────────────────────────────────────────
 
-export function generateMenuHtml(menuItems: Array<{ nome: string; preco: string; descricao: string }>) {
-  if (!menuItems?.length) return '<p class="empty-menu">Cardápio em atualização...</p>'
+export async function generateMenuHtml(menuItems: Array<{ nome: string; preco: string; descricao: string }>) {
+   if (!menuItems?.length) return '<p class="empty-menu">Cardápio em atualização...</p>'
   return menuItems.map(item => `
     <div class="menu-item reveal">
       <div class="menu-item-header">
