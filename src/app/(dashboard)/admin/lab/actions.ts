@@ -88,25 +88,48 @@ async function deployToGithubPages(
   return { repoName, htmlUrl, pagesUrl }
 }
 
+// ─── STATUS & MONITORAMENTO (NOVO) ───────────────────────────────────────────
+
+export async function checkEnvStatus() {
+  return {
+    GITHUB_TOKEN: !!process.env.GITHUB_TOKEN,
+    GITHUB_ORG: !!process.env.GITHUB_ORG,
+    SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    LAB_URL: !!process.env.NEXT_PUBLIC_LAB_BASE_URL,
+  }
+}
+
 // ─── TEMPLATES ───────────────────────────────────────────────────────────────
 
-export async function createTemplate(formData: FormData) {
+export async function createTemplate(formData: any) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Não autorizado')
+  
+  if (!user) return { success: false, error: 'Não autorizado' }
 
   const { error } = await supabase.from('lab_templates').insert({
-    name:                 formData.get('name') as string,
-    niche:                formData.get('niche') as LabNiche,
-    description:          formData.get('description') as string,
-    github_template_repo: formData.get('github_template_repo') as string,
-    thumbnail_url:        formData.get('thumbnail_url') as string || null,
-    preview_demo_url:     formData.get('preview_demo_url') as string || null,
+    name:                 formData.name,
+    niche:                formData.niche,
+    description:          formData.description,
+    github_template_repo: formData.github_template_repo,
+    thumbnail_url:        formData.thumbnail_url || null,
+    preview_demo_url:     formData.preview_demo_url || null,
     created_by:           user.id,
+    is_active:            true,
+    default_features: {
+      seo_schema: true,
+      whatsapp_button: true,
+      google_maps: true
+    }
   })
 
-  if (error) throw error
+  if (error) {
+    console.error('Erro ao criar template:', error)
+    return { success: false, error: error.message }
+  }
+
   revalidatePath('/admin/lab/templates')
+  return { success: true }
 }
 
 export async function toggleTemplateStatus(id: string, is_active: boolean) {
