@@ -1,10 +1,8 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Cloud, CheckCircle2, AlertCircle } from "lucide-react";
 
-// Ícone SVG Customizado do Github
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -16,34 +14,35 @@ function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function EnvStatusPanel() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Integrações</CardTitle>
-        <CardDescription>Status dos serviços de deploy</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
-          <div className="flex items-center gap-3">
+    <div className="rounded-2xl border border-border/60 bg-card shadow-sm p-6 flex flex-col gap-6">
+      <div className="flex flex-col">
+        <h3 className="text-lg font-medium">Integrações</h3>
+        <p className="text-sm text-muted-foreground mt-2">Status dos serviços de deploy</p>
+      </div>
+      
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between p-4 border border-border/60 rounded-xl bg-background">
+          <div className="flex items-center gap-4">
             <GithubIcon className="w-5 h-5 text-foreground" />
             <div>
               <p className="text-sm font-medium">GitHub API</p>
-              <p className="text-xs text-muted-foreground">Conectado</p>
+              <p className="text-sm text-muted-foreground">Conectado</p>
             </div>
           </div>
           <CheckCircle2 className="w-4 h-4 text-emerald-500" />
         </div>
 
-        <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between p-4 border border-border/60 rounded-xl bg-background">
+          <div className="flex items-center gap-4">
             <Cloud className="w-5 h-5 text-foreground" />
             <div>
               <p className="text-sm font-medium">Motor de Deploy</p>
-              <p className="text-xs text-amber-500">Aviso: Cota alta</p>
+              <p className="text-sm text-yellow-500">Aviso: Cota alta</p>
             </div>
           </div>
-          <AlertCircle className="w-4 h-4 text-amber-500" />
+          <AlertCircle className="w-4 h-4 text-yellow-500" />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

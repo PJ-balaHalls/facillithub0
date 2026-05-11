@@ -10,7 +10,6 @@ import {
   Dumbbell, Briefcase, Plus, Loader2 
 } from "lucide-react";
 
-// Ícone SVG Customizado do Github para evitar o erro do lucide-react
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -42,7 +41,7 @@ export function CreateTemplateModal({ children }: { children: React.ReactNode })
 
     const res = await createTemplate(data);
     if (res.success) {
-      toast.success("Template mestre ativado com sucesso!");
+      toast.success("Template ativado com sucesso!");
       setOpen(false);
     } else {
       toast.error(res.error);
@@ -53,91 +52,83 @@ export function CreateTemplateModal({ children }: { children: React.ReactNode })
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[850px] p-0 border-none bg-white shadow-2xl rounded-3xl overflow-hidden">
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          {/* Header Finder-Style */}
-          <div className="bg-[#0f172a] p-8 text-white relative">
-            <div className="absolute top-0 right-0 opacity-10 p-4">
-              <Layout size={120} />
-            </div>
-            <DialogHeader>
-              <p className="text-[#5CA3FF] text-[10px] font-bold uppercase tracking-[0.3em] mb-2">Engenharia de Software</p>
-              <DialogTitle className="text-3xl font-extrabold tracking-tight">Factory: Template Mestre</DialogTitle>
-              <p className="text-gray-400 text-sm mt-2 max-w-md">Configure o repositório base que servirá de matriz para deploys automatizados.</p>
-            </DialogHeader>
-          </div>
+      <DialogContent className="sm:max-w-3xl rounded-2xl p-6 border border-border/60 bg-background shadow-sm flex flex-col gap-6">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-semibold tracking-tight">Factory: Template Mestre</DialogTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Configure o repositório base que servirá de matriz para deploys automatizados.
+          </p>
+        </DialogHeader>
 
-          <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 max-h-[60vh] overflow-y-auto bg-white">
-            {/* Coluna Esquerda: Nicho e Identificação */}
-            <div className="space-y-6">
-              <div>
-                <label className="text-[11px] font-black text-gray-400 uppercase tracking-wider mb-4 block">Segmentação de Mercado</label>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Segmentação de Mercado</label>
                 <div className="grid grid-cols-3 gap-2">
                   {NICHES.map((n) => (
                     <button
                       key={n.key}
                       type="button"
                       onClick={() => setSelectedNiche(n.key)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200 ease-in-out ${
                         selectedNiche === n.key 
-                        ? "border-[#5CA3FF] bg-blue-50 text-[#5CA3FF]" 
-                        : "border-gray-100 hover:bg-gray-50 text-gray-500"
+                        ? "border-primary bg-primary/10 text-primary" 
+                        : "border-border bg-background hover:bg-muted/40 text-muted-foreground"
                       }`}
                     >
                       <n.icon size={20} className="mb-1" />
-                      <span className="text-[10px] font-bold">{n.label}</span>
+                      <span className="text-xs font-medium">{n.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-700">Nome Comercial</label>
-                  <input name="name" required placeholder="Ex: Delivery Pro V3" className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:border-[#5CA3FF] focus:ring-0 transition-all text-sm" />
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Nome Comercial</label>
+                  <input name="name" required placeholder="Ex: Delivery Pro V3" className="h-11 rounded-xl px-4 border border-border bg-background focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all text-sm" />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-700">Descrição Técnica</label>
-                  <textarea name="description" rows={3} placeholder="Diferenciais técnicos deste modelo..." className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:border-[#5CA3FF] transition-all text-sm resize-none" />
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Descrição Técnica</label>
+                  <textarea name="description" rows={3} placeholder="Diferenciais técnicos deste modelo..." className="rounded-xl p-4 border border-border bg-background focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all text-sm resize-none" />
                 </div>
               </div>
             </div>
 
-            {/* Coluna Direita: Repositório e Links */}
-            <div className="space-y-6">
-              <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100 space-y-4">
-                <label className="text-[11px] font-black text-gray-400 uppercase tracking-wider block">Conector GitHub</label>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4 p-6 rounded-2xl border border-border/60 bg-muted/40">
+                <label className="text-sm font-medium">Conector GitHub</label>
                 <div className="relative">
-                  <GithubIcon className="absolute left-4 top-3 size-4 text-gray-400" />
-                  <input name="github_template_repo" required placeholder="org/repositorio" className="w-full pl-12 pr-4 py-3 rounded-xl bg-white border border-gray-200 text-sm font-mono" />
+                  <GithubIcon className="absolute left-4 top-3.5 size-4 text-muted-foreground" />
+                  <input name="github_template_repo" required placeholder="org/repositorio" className="h-11 w-full pl-11 pr-4 rounded-xl border border-border bg-background focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all text-sm font-mono" />
                 </div>
-                <p className="text-[10px] text-gray-400 italic">O sistema irá clonar automaticamente este repositório durante o processo de geração de leads.</p>
+                <p className="text-xs text-muted-foreground">O sistema irá clonar automaticamente este repositório durante o processo de geração de leads.</p>
               </div>
 
-              <div className="space-y-4 pt-2">
+              <div className="flex flex-col gap-4 pt-2">
                 <div className="relative">
-                  <Smartphone className="absolute left-4 top-3 size-4 text-gray-400" />
-                  <input name="preview_demo_url" placeholder="URL Live Demo" className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-100 text-sm" />
+                  <Smartphone className="absolute left-4 top-3.5 size-4 text-muted-foreground" />
+                  <input name="preview_demo_url" placeholder="URL Live Demo" className="h-11 w-full pl-11 pr-4 rounded-xl border border-border bg-background focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all text-sm" />
                 </div>
                 <div className="relative">
-                  <Layout className="absolute left-4 top-3 size-4 text-gray-400" />
-                  <input name="thumbnail_url" placeholder="URL da Thumbnail" className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-100 text-sm" />
+                  <Layout className="absolute left-4 top-3.5 size-4 text-muted-foreground" />
+                  <input name="thumbnail_url" placeholder="URL da Thumbnail" className="h-11 w-full pl-11 pr-4 rounded-xl border border-border bg-background focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all text-sm" />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Footer Ações */}
-          <div className="p-8 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-            <div className="flex gap-4">
-              <button type="button" onClick={() => setOpen(false)} className="text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">Descartar</button>
-            </div>
+          <div className="flex items-center justify-end gap-4 pt-4 border-t border-border/60">
+            <button type="button" onClick={() => setOpen(false)} className="h-11 rounded-xl px-4 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 ease-in-out">
+              Descartar
+            </button>
             <button
               type="submit"
               disabled={loading}
-              className="bg-[#0f172a] hover:bg-black text-white px-10 py-4 rounded-full font-bold text-sm uppercase tracking-widest shadow-lg flex items-center gap-3 transition-all disabled:opacity-50"
+              className="h-11 rounded-xl px-6 bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-200 ease-in-out disabled:opacity-50"
             >
-              {loading ? <Loader2 className="animate-spin size-4" /> : <><Plus size={18} /> Ativar no Cluster</>}
+              {loading ? <Loader2 className="animate-spin size-4" /> : <><Plus size={16} /> Ativar no Cluster</>}
             </button>
           </div>
         </form>

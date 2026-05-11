@@ -1,3 +1,4 @@
+// src/app/(dashboard)/admin/finder/page.tsx
 import { Suspense } from "react"
 import { createClient } from "@/lib/server"
 import Link from "next/link"
@@ -22,7 +23,6 @@ async function getStats(supabase: any) {
   }
 }
 
-// ✅ EXPORTAÇÃO PADRÃO OBRIGATÓRIA (REACT COMPONENT)
 export default async function FinderPage() {
   const supabase = await createClient()
   
@@ -34,74 +34,94 @@ export default async function FinderPage() {
   const stats = await getStats(supabase)
 
   return (
-    <div className="max-w-[1400px] mx-auto p-6 space-y-10 animate-in fade-in duration-700">
+    <div className="flex flex-col gap-6 p-6">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900">Finder Intelligence</h1>
-          <p className="text-muted-foreground text-sm font-light">Mapeamento de infraestrutura digital para negócios locais.</p>
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-semibold tracking-tight">Finder Intelligence</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Mapeamento de infraestrutura digital para negócios locais.
+          </p>
         </div>
         <SearchForm />
       </header>
 
       {/* Métricas */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-sm flex flex-col justify-between h-36">
-          <span className="text-[10px] font-bold uppercase text-gray-400 tracking-widest">Varreduras Totais</span>
-          <div className="flex items-end justify-between">
-            <span className="text-4xl font-bold text-gray-900">{stats.total}</span>
-            <Activity className="size-6 text-gray-200" />
+        <div className="rounded-2xl border border-border/60 bg-card shadow-sm p-6 flex flex-col gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="p-4 rounded-xl bg-muted/40 text-primary">
+              <Activity size={24} />
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm font-medium text-muted-foreground">Varreduras Totais</p>
+              <p className="text-2xl font-semibold tracking-tight">{stats.total}</p>
+            </div>
           </div>
         </div>
-        <div className="p-8 bg-white border border-gray-100 rounded-[2.5rem] shadow-sm flex flex-col justify-between h-36">
-          <span className="text-[10px] font-bold uppercase text-emerald-400 tracking-widest">Finalizados</span>
-          <div className="flex items-end justify-between">
-            <span className="text-4xl font-bold text-gray-900">{stats.completed}</span>
-            <CheckCircle2 className="size-6 text-emerald-100" />
+        
+        <div className="rounded-2xl border border-border/60 bg-card shadow-sm p-6 flex flex-col gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="p-4 rounded-xl bg-green-500/10 text-green-600">
+              <CheckCircle2 size={24} />
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm font-medium text-muted-foreground">Finalizados</p>
+              <p className="text-2xl font-semibold tracking-tight">{stats.completed}</p>
+            </div>
           </div>
         </div>
-        <div className={`p-8 border rounded-[2.5rem] shadow-sm flex flex-col justify-between h-36 ${stats.running > 0 ? 'bg-blue-50/50 border-blue-100 animate-pulse' : 'bg-white border-gray-100'}`}>
-          <span className="text-[10px] font-bold uppercase text-gray-400 tracking-widest">Ativos</span>
-          <div className="flex items-end justify-between">
-            <span className="text-4xl font-bold text-gray-900">{stats.running}</span>
-            <Clock className="size-6 text-gray-200" />
+
+        <div className="rounded-2xl border border-border/60 bg-card shadow-sm p-6 flex flex-col gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+          <div className="flex items-center gap-4">
+            <div className={`p-4 rounded-xl ${stats.running > 0 ? 'bg-blue-500/10 text-blue-500' : 'bg-muted/40 text-muted-foreground'}`}>
+              <Clock size={24} />
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm font-medium text-muted-foreground">Ativos</p>
+              <p className="text-2xl font-semibold tracking-tight">{stats.running}</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <main className="lg:col-span-8 bg-white border border-gray-100 rounded-[3rem] shadow-sm overflow-hidden">
-          <div className="px-10 py-8 border-b border-gray-50 flex items-center gap-3">
-            <BarChart3 className="size-5 text-blue-500" />
-            <h2 className="font-bold text-gray-900 text-lg">Histórico</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <main className="lg:col-span-8 rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-border/60 flex items-center gap-4">
+            <BarChart3 className="text-muted-foreground" size={20} />
+            <h2 className="text-lg font-medium">Histórico de Operações</h2>
           </div>
-          <Suspense fallback={<div className="p-10 space-y-6"><Skeleton className="h-20 w-full rounded-2xl" /></div>}>
+          <Suspense fallback={<div className="p-6 flex flex-col gap-4"><Skeleton className="h-20 w-full rounded-2xl" /><Skeleton className="h-20 w-full rounded-2xl" /></div>}>
             <SearchesList searches={searches || []} />
           </Suspense>
         </main>
 
-        <aside className="lg:col-span-4 space-y-6">
-          <div className="p-10 bg-gray-900 rounded-[3rem] text-white shadow-2xl">
-            <div className="flex items-center gap-3 mb-10">
-              <div className="p-2.5 bg-white/10 rounded-2xl">
-                <Zap className="size-5 text-yellow-400 fill-yellow-400" />
+        <aside className="lg:col-span-4 flex flex-col gap-6">
+          <div className="rounded-2xl border border-border/60 bg-card shadow-sm p-6 flex flex-col gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 rounded-xl bg-muted/40 text-primary">
+                <Zap size={24} />
               </div>
-              <h3 className="text-xs font-bold uppercase opacity-80">Infra Performance</h3>
+              <h3 className="text-lg font-medium">Infra Performance</h3>
             </div>
-            <div className="space-y-5">
-              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                <span className="text-[12px] text-gray-400">AI Engine</span>
-                <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1.5">
-                  <ShieldCheck className="size-3" /> ONLINE
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between p-4 border border-border/60 rounded-xl bg-background">
+                <span className="text-sm font-medium">Motor de IA</span>
+                <span className="text-sm font-medium text-green-600 flex items-center gap-2">
+                  <ShieldCheck size={16} /> ONLINE
                 </span>
               </div>
             </div>
           </div>
-          <Link href="/admin/vendas/leads" className="flex items-center justify-between p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] group hover:bg-blue-100 transition-all shadow-sm">
-            <div className="flex items-center gap-4">
-              <Users className="size-6 text-[#5CA3FF]" />
-              <span className="text-md font-bold text-[#5CA3FF]">Ver Leads</span>
+          
+          <Link 
+            href="/admin/vendas/leads" 
+            className="flex items-center justify-between h-11 rounded-xl px-4 border border-border/60 bg-card hover:bg-muted/40 transition-all duration-200 ease-in-out text-sm font-medium shadow-sm"
+          >
+            <div className="flex items-center gap-2">
+              <Users size={16} />
+              <span>Acessar CRM de Leads</span>
             </div>
-            <ArrowUpRight className="size-5 text-[#5CA3FF]" />
+            <ArrowUpRight size={16} className="text-muted-foreground" />
           </Link>
         </aside>
       </div>

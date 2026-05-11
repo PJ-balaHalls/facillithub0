@@ -24,15 +24,15 @@ export function PreviewsTable() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-12 text-muted-foreground w-full">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="flex items-center justify-center p-6 text-muted-foreground w-full h-40">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (previews.length === 0) {
     return (
-      <div className="p-12 text-center text-muted-foreground w-full">
+      <div className="flex items-center justify-center p-6 text-center text-sm text-muted-foreground w-full h-40 border-t border-border/60 bg-muted/20">
         Nenhum preview ativo no momento. Clique em "Gerar Novo Preview" para criar um laboratório.
       </div>
     );
@@ -41,12 +41,12 @@ export function PreviewsTable() {
   return (
     <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead>Identificação / Negócio</TableHead>
-          <TableHead>Template Base</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Criado em</TableHead>
-          <TableHead className="text-right">Ações</TableHead>
+        <TableRow className="hover:bg-transparent">
+          <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Identificação / Negócio</TableHead>
+          <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Template Base</TableHead>
+          <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Status</TableHead>
+          <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Criado em</TableHead>
+          <TableHead className="text-right text-xs uppercase tracking-wide text-muted-foreground">Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

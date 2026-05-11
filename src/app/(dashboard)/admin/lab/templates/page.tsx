@@ -13,18 +13,18 @@ export default function TemplatesPage() {
   // 2. Removemos o estado isCreateModalOpen, pois o novo modal gere-se a si próprio
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
+    <div className="flex flex-col gap-6 p-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Templates Base</h2>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight">Templates Base</h1>
+          <p className="text-sm text-muted-foreground mt-2">
             Gerencie os repositórios matriz que servem de base para os novos ambientes.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-4">
           {/* 3. O modal agora envolve o botão que serve de gatilho (Trigger) */}
           <CreateTemplateModal>
-            <Button className="gap-2">
+            <Button className="h-11 rounded-xl px-4 gap-2 transition-all duration-200 ease-in-out">
               <Plus className="w-4 h-4" />
               Adicionar Template
             </Button>
@@ -34,12 +34,12 @@ export default function TemplatesPage() {
 
       <div className="grid gap-6 md:grid-cols-12">
         {/* Coluna Principal: Grid de Templates */}
-        <div className="md:col-span-8 lg:col-span-9 space-y-4">
+        <div className="md:col-span-8 lg:col-span-9 flex flex-col gap-6">
           <TemplateGrid />
         </div>
 
         {/* Coluna Lateral: Status do Ambiente e Integrações */}
-        <div className="md:col-span-4 lg:col-span-3">
+        <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-6">
           <EnvStatusPanel />
         </div>
       </div>

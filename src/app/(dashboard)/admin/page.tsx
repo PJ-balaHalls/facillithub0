@@ -1,263 +1,332 @@
+// ==========================================
+// IMPORTS & DEPENDENCIES
+// ==========================================
+import React, { Suspense } from "react";
+import Link from "next/link";
+import { createClient } from "@/lib/server";
 import { 
-  ArrowRight, Search, Target, Rocket, 
-  TrendingUp, Users, Activity, MapPin, 
-  Clock, Server, CheckCircle2, ShieldAlert, 
-  MessageCircle, Wallet, Zap, Layers
-} from "lucide-react"
-import Link from "next/link"
+  Users, Target, Search, Zap, 
+  ArrowRight, Activity, Server, ShieldCheck, 
+  TrendingUp, Clock, Plus, LayoutTemplate
+} from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// ============================================================================
-// BLOCOS COMPONENTIZADOS (PODE APAGAR OU MOVER SEM QUEBRAR A PÁGINA)
-// ============================================================================
+// ==========================================
+// DATA FETCHING (SERVER-SIDE)
+// ==========================================
 
-function HeaderBlock() {
-  return (
-    <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Bom dia, Operação</h1>
-        <p className="text-[13px] font-light text-gray-500 mt-1">Visão geral da sua fábrica de clientes e automações.</p>
-      </div>
-      <div className="flex items-center gap-3">
-        <button className="px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-900 text-[13px] font-medium rounded-full transition-all border border-gray-200/60 shadow-sm">
-          Auditar Inteligência
-        </button>
-        <button className="px-5 py-2.5 bg-[#5CA3FF] hover:bg-[#4b8ce0] text-white text-[13px] font-medium rounded-full transition-all shadow-sm shadow-blue-500/20 flex items-center gap-2">
-          <Zap className="size-3.5 fill-white" /> Deploy Rápido
-        </button>
-      </div>
-    </section>
-  )
+/**
+ * Busca as métricas principais do sistema de forma paralela.
+ * Prepara o terreno para quando as tabelas de faturamento e leads estiverem gigantes.
+ */
+async function getDashboardMetrics(supabase: any) {
+  try {
+    // Executa as queries em paralelo para não travar a renderização
+    const [
+      { count: totalSearches },
+      { count: activeLabs },
+      { count: totalLeads },
+    ] = await Promise.all([
+      supabase.from('finder_searches').select('id', { count: 'exact', head: true }),
+      supabase.from('lab_previews').select('id', { count: 'exact', head: true }).eq('status', 'active'), // Exemplo de tabela futura
+      supabase.from('crm_leads').select('id', { count: 'exact', head: true }), // Exemplo de tabela futura
+    ]);
+
+    return {
+      searches: totalSearches || 0,
+      activeLabs: activeLabs || 0,
+      leads: totalLeads || 0,
+      revenue: 0, // Placeholder pronto para ser conectado ao Stripe/Gateway
+    };
+  } catch (error) {
+    console.error("Erro ao carregar métricas:", error);
+    return { searches: 0, activeLabs: 0, leads: 0, revenue: 0 };
+  }
 }
 
-function AlertsBlock() {
-  return (
-    <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100 flex items-start gap-3">
-        <ShieldAlert className="size-5 text-amber-600 shrink-0 mt-0.5" />
-        <div>
-          <p className="text-[13px] font-semibold text-amber-900">3 Leads Quentes Parados</p>
-          <p className="text-[11px] text-amber-700 mt-0.5">Negócios com dor explícita aguardando abordagem no WhatsApp.</p>
-        </div>
-      </div>
-      <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-3">
-        <CheckCircle2 className="size-5 text-emerald-600 shrink-0 mt-0.5" />
-        <div>
-          <p className="text-[13px] font-semibold text-emerald-900">Novo Setup Confirmado</p>
-          <p className="text-[11px] text-emerald-700 mt-0.5">Pizzaria Bela Napoli realizou o pagamento via Stripe.</p>
-        </div>
-      </div>
-      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100 flex items-start gap-3">
-        <Rocket className="size-5 text-blue-600 shrink-0 mt-0.5" />
-        <div>
-          <p className="text-[13px] font-semibold text-blue-900">2 Deploys Concluídos</p>
-          <p className="text-[11px] text-blue-700 mt-0.5">As prévias da "Fábrica" estão prontas para demonstração.</p>
-        </div>
-      </div>
-    </section>
-  )
+/**
+ * Busca a atividade recente (ex: últimos garimpos do Finder)
+ */
+async function getRecentActivity(supabase: any) {
+  try {
+    const { data } = await supabase
+      .from('finder_searches')
+      .select('id, name, status, created_at')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    return data || [];
+  } catch (error) {
+    return [];
+  }
 }
 
-function KpisBlock() {
-  const kpis = [
-    { title: "Receita Mensal (MRR)", value: "R$ 8.450", change: "+12%", trend: "up", icon: TrendingUp },
-    { title: "Clientes Ativos", value: "42", change: "+4", trend: "up", icon: Users },
-    { title: "Leads Qualificados (>4.5)", value: "1.204", change: "+148", trend: "up", icon: Target },
-    { title: "Taxa de Conversão", value: "8.2%", change: "+1.1%", trend: "up", icon: Activity },
-  ]
-  return (
-    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {kpis.map((kpi, i) => (
-        <div key={i} className="p-5 rounded-3xl bg-white border border-gray-100 shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-gray-50 rounded-xl"><kpi.icon strokeWidth={1.5} className="size-4 text-gray-700" /></div>
-            <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${kpi.trend === 'up' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
-              {kpi.change}
-            </span>
-          </div>
-          <p className="text-xs font-medium text-gray-500">{kpi.title}</p>
-          <h3 className="text-2xl font-semibold tracking-tight text-gray-900 mt-1">{kpi.value}</h3>
-        </div>
-      ))}
-    </section>
-  )
-}
+// ==========================================
+// SUB-COMPONENTS (UI BLOCKS)
+// ==========================================
 
-function ShortcutsBlock() {
-  const shortcuts = [
-    { label: "Garimpar Local", desc: "Configurar Apify", icon: Search, href: "/admin/finder/buscas" },
-    { label: "Análise de Dores", desc: "Revisão Gemini", icon: Target, href: "/admin/finder/analise" },
-    { label: "Central de Vendas", desc: "Disparos WPP", icon: MessageCircle, href: "/admin/vendas/crm" },
-    { label: "Fábrica de Sites", desc: "Gestão Lab", icon: Rocket, href: "/admin/lab/previews" },
-    { label: "Gestão Financeira", desc: "Faturas Stripe", icon: Wallet, href: "/admin/faturamento" },
-    { label: "Catálogo Evolutivo", desc: "Upsell Clientes", icon: Layers, href: "/admin/insights/catalogo" },
-  ]
+function MetricCard({ title, value, subtitle, icon: Icon, colorClass, bgClass }: any) {
   return (
-    <section>
-      <h2 className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest mb-4 px-1">Atalhos Operacionais</h2>
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-        {shortcuts.map((action, i) => (
-          <Link key={i} href={action.href} className="group p-4 rounded-2xl border border-gray-100 bg-white hover:border-gray-200 transition-all shadow-sm hover:shadow-md flex flex-col items-start gap-4">
-            <div className="p-2.5 bg-gray-50 rounded-xl group-hover:bg-blue-50 transition-colors">
-              <action.icon strokeWidth={1.5} className="size-5 text-gray-600 group-hover:text-[#5CA3FF] transition-colors" />
-            </div>
-            <div>
-              <p className="text-[13px] font-semibold text-gray-900">{action.label}</p>
-              <p className="text-[11px] font-medium text-gray-500 mt-0.5">{action.desc}</p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function FinderRadarBlock() {
-  return (
-    <div className="p-6 rounded-3xl bg-white border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col h-full">
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h2 className="text-[15px] font-semibold tracking-tight text-gray-900">Radar de Oportunidades (IA)</h2>
-          <p className="text-[12px] font-light text-gray-500 mt-1">Negócios mapeados com dores de infraestrutura explícitas.</p>
+    <div className="rounded-2xl border border-border/60 bg-card shadow-sm p-6 flex flex-col gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-center gap-4">
+        <div className={`p-4 rounded-xl ${bgClass} ${colorClass}`}>
+          <Icon size={24} />
         </div>
-        <Link href="/admin/finder/leads" className="text-[11px] font-semibold text-[#5CA3FF] flex items-center gap-1 bg-blue-50 hover:bg-blue-100 transition-colors px-3 py-1.5 rounded-full uppercase tracking-wider">
-          Ver Funil <ArrowRight className="size-3" />
-        </Link>
+        <div className="flex flex-col">
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+        </div>
       </div>
-      <div className="divide-y divide-gray-50 flex-1">
-        {[
-          { nome: "Clínica Odonto Vida", dor: "Sem botão de WhatsApp e site quebrado", score: "4.9", city: "São Paulo, SP" },
-          { nome: "Pizzaria Bela Napoli", dor: "Cardápio em PDF ilegível no Maps", score: "4.7", city: "Campinas, SP" },
-          { nome: "Barbearia do João", dor: "Reclamações de telefone não atende", score: "4.6", city: "Curitiba, PR" },
-        ].map((lead, i) => (
-          <div key={i} className="py-4 flex justify-between items-center group">
-            <div className="flex items-start gap-3">
-              <div className="mt-1 p-2 bg-gray-50 rounded-xl border border-gray-100"><MapPin strokeWidth={1.5} className="size-4 text-gray-500" /></div>
-              <div>
-                <h3 className="text-[14px] font-semibold text-gray-900">{lead.nome} <span className="text-[11px] font-normal text-gray-400 ml-2">{lead.city}</span></h3>
-                <p className="text-[11px] text-red-500 font-semibold mt-1 uppercase tracking-wider bg-red-50 inline-block px-2 py-0.5 rounded-md">Identificado: {lead.dor}</p>
-              </div>
-            </div>
-            <div className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[12px] font-bold rounded-lg border border-emerald-100">
-              ★ {lead.score}
-            </div>
-          </div>
-        ))}
-      </div>
+      {subtitle && (
+        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground pt-4 border-t border-border/60 mt-auto">
+          <TrendingUp size={14} className="text-green-500" />
+          {subtitle}
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-function DeployEngineBlock() {
+function ShortcutCard({ title, description, href, icon: Icon, isPrimary = false }: any) {
   return (
-    <div className="p-6 rounded-3xl bg-white border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] h-full">
-      <h2 className="text-[15px] font-semibold tracking-tight text-gray-900 mb-6">Motor de Deploy (Lab)</h2>
-      <div className="space-y-6">
-        {[
-          { cliente: "Odonto Vida", status: "Building", time: "Há 2 min", active: true },
-          { cliente: "Bela Napoli", status: "Concluído", time: "Há 15 min", active: false },
-          { cliente: "Mecânica Auto", status: "Falhou", time: "Há 1 hora", active: false, error: true },
-          { cliente: "Restaurante Sabor", status: "Na Fila", time: "Há 2 horas", active: false, pending: true },
-        ].map((job, i) => (
-          <div key={i} className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="relative flex size-3">
-                {job.active && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5CA3FF] opacity-75"></span>}
-                <span className={`relative inline-flex rounded-full size-3 ${job.error ? 'bg-red-500' : job.active ? 'bg-[#5CA3FF]' : job.pending ? 'bg-gray-200' : 'bg-emerald-500'}`}></span>
-              </span>
-              <div>
-                <p className="text-[13px] font-semibold text-gray-900">{job.cliente}</p>
-                <p className="text-[11px] font-medium text-gray-400 mt-0.5">{job.time}</p>
-              </div>
-            </div>
-            <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-1 rounded-md ${job.error ? 'bg-red-50 text-red-600' : job.active ? 'bg-blue-50 text-[#5CA3FF]' : job.pending ? 'bg-gray-50 text-gray-500' : 'bg-emerald-50 text-emerald-600'}`}>
-              {job.status}
-            </span>
-          </div>
-        ))}
+    <Link 
+      href={href}
+      className={`rounded-2xl border border-border/60 p-6 flex flex-col gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md group ${
+        isPrimary 
+          ? "bg-primary text-primary-foreground hover:bg-primary/90 border-transparent" 
+          : "bg-card hover:bg-muted/40"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div className={`p-3 rounded-xl ${isPrimary ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-foreground"} group-hover:scale-105 transition-transform duration-200 ease-in-out`}>
+          <Icon size={20} />
+        </div>
+        <ArrowRight size={20} className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200 -translate-x-2 group-hover:translate-x-0 ${isPrimary ? "text-primary-foreground" : "text-muted-foreground"}`} />
       </div>
-    </div>
-  )
+      <div className="flex flex-col mt-2">
+        <h3 className={`text-base font-semibold ${isPrimary ? "text-primary-foreground" : "text-foreground"}`}>{title}</h3>
+        <p className={`text-sm mt-1 ${isPrimary ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{description}</p>
+      </div>
+    </Link>
+  );
 }
 
-function PipelineBlock() {
-  return (
-    <div className="p-6 rounded-3xl bg-white border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-      <h2 className="text-[15px] font-semibold tracking-tight text-gray-900 mb-6">Pipeline de Vendas (Sniper)</h2>
-      <div className="space-y-6">
-        {[
-          { step: "Abordagens Hoje", count: 24, percent: "100%", color: "bg-gray-200" },
-          { step: "Prévias Enviadas (Demos)", count: 8, percent: "33%", color: "bg-[#5CA3FF]" },
-          { step: "Fechamentos (Setup Pago)", count: 2, percent: "8%", color: "bg-emerald-400" },
-        ].map((pipe, i) => (
-          <div key={i}>
-            <div className="flex justify-between text-[12px] text-gray-700 mb-2 font-semibold">
-              <span>{pipe.step} <span className="text-gray-400 font-medium">({pipe.count})</span></span>
-              <span>{pipe.percent}</span>
-            </div>
-            <div className="h-2 w-full bg-gray-50 rounded-full overflow-hidden">
-              <div className={`h-full ${pipe.color} rounded-full`} style={{ width: pipe.percent }}></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function SystemHealthBlock() {
-  return (
-    <div className="p-6 rounded-3xl bg-white border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-      <h2 className="text-[15px] font-semibold tracking-tight text-gray-900 mb-6">Saúde das APIs</h2>
-      <div className="grid grid-cols-2 gap-4">
-        {[
-          { nome: "Apify Crawler", status: "Operacional", icon: Search },
-          { nome: "OpenAI Gemini", status: "Operacional", icon: Target },
-          { nome: "GitHub Actions", status: "Latência", icon: Server, warn: true },
-          { nome: "Stripe Billing", status: "Operacional", icon: Wallet },
-        ].map((api, i) => (
-          <div key={i} className="p-4 rounded-2xl border border-gray-100 bg-gray-50/50 flex items-center gap-3">
-            <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100"><api.icon strokeWidth={1.5} className="size-4 text-gray-700" /></div>
-            <div>
-              <p className="text-[12px] font-semibold text-gray-900">{api.nome}</p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <div className={`size-1.5 rounded-full ${api.warn ? 'bg-amber-400' : 'bg-emerald-500'}`} />
-                <span className="text-[10px] font-medium uppercase tracking-wider text-gray-500">{api.status}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// MONTAGEM FINAL DA PÁGINA (CHAMANDO OS BLOCOS)
-// ============================================================================
+// ==========================================
+// MAIN PAGE EXPORT
+// ==========================================
 
 export default async function AdminDashboardPage() {
-  // Simulador de carregamento assíncrono para você ver o Skeleton Premium
-  await new Promise(resolve => setTimeout(resolve, 800))
+  const supabase = await createClient();
+  
+  // Dispara as requisições
+  const metricsData = getDashboardMetrics(supabase);
+  const activityData = getRecentActivity(supabase);
+
+  // Aguarda as promessas (pode ser evoluído com Promise.all para performance)
+  const metrics = await metricsData;
+  const recentActivity = await activityData;
+
+  // Saudação de acordo com o horário do servidor
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
 
   return (
-    <div className="flex flex-col gap-10 w-full max-w-[1400px] mx-auto animate-in fade-in duration-700 pb-20 mt-2">
-      <HeaderBlock />
-      <AlertsBlock />
-      <KpisBlock />
+    <div className="flex flex-col gap-6 p-6">
       
-      <hr className="border-t border-gray-200/60 w-full" />
-      
-      <ShortcutsBlock />
-      
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2"><FinderRadarBlock /></div>
-        <div><DeployEngineBlock /></div>
+      {/* ========================================== */}
+      {/* HEADER SECTION                             */}
+      {/* ========================================== */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-semibold tracking-tight">{greeting}, Admin.</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Visão geral da operação, infraestrutura e funil de vendas.
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Link 
+            href="/admin/finder" 
+            className="h-11 rounded-xl px-4 bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-200 ease-in-out shadow-sm"
+          >
+            <Search size={16} />
+            Novo Garimpo
+          </Link>
+        </div>
+      </header>
+
+      {/* ========================================== */}
+      {/* METRICS GRID                               */}
+      {/* ========================================== */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <MetricCard 
+          title="Leads Capturados" 
+          value={metrics.leads} 
+          subtitle="+12% em relação ao mês anterior"
+          icon={Users}
+          bgClass="bg-blue-500/10"
+          colorClass="text-blue-600"
+        />
+        <MetricCard 
+          title="Garimpos Realizados" 
+          value={metrics.searches} 
+          subtitle="Máquina rodando"
+          icon={Search}
+          bgClass="bg-purple-500/10"
+          colorClass="text-purple-600"
+        />
+        <MetricCard 
+          title="Labs Ativos (Previews)" 
+          value={metrics.activeLabs} 
+          subtitle="Oportunidades em negociação"
+          icon={LayoutTemplate}
+          bgClass="bg-orange-500/10"
+          colorClass="text-orange-600"
+        />
+        <MetricCard 
+          title="Receita Estimada" 
+          value={`R$ ${metrics.revenue},00`} 
+          subtitle="Métricas de MRR a conectar"
+          icon={Activity}
+          bgClass="bg-green-500/10"
+          colorClass="text-green-600"
+        />
+      </section>
+
+      {/* ========================================== */}
+      {/* SHORTCUTS / QUICK ACTIONS                  */}
+      {/* ========================================== */}
+      <div className="flex flex-col gap-4 mt-2">
+        <h2 className="text-lg font-medium tracking-tight">Atalhos Rápidos</h2>
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ShortcutCard 
+            title="Finder AI" 
+            description="Mapeie infraestrutura de novos clientes." 
+            href="/admin/finder" 
+            icon={Target}
+            isPrimary={true}
+          />
+          <ShortcutCard 
+            title="Factory Lab" 
+            description="Gere ambientes de preview automatizados." 
+            href="/admin/lab/previews" 
+            icon={Zap}
+          />
+          <ShortcutCard 
+            title="CRM de Vendas" 
+            description="Gira as oportunidades e conversões." 
+            href="/admin/vendas/leads" 
+            icon={Users}
+          />
+          <ShortcutCard 
+            title="Status da Infra" 
+            description="Monitore serviços, APIs e o servidor." 
+            href="/admin/infra/status" 
+            icon={Server}
+          />
+        </section>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PipelineBlock />
-        <SystemHealthBlock />
-      </div>
+      {/* ========================================== */}
+      {/* MAIN CONTENT / SPLIT VIEW                  */}
+      {/* ========================================== */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-2">
+        
+        {/* Lado Esquerdo: Atividade Recente (Maior) */}
+        <div className="lg:col-span-8 rounded-2xl border border-border/60 bg-card shadow-sm flex flex-col overflow-hidden">
+          <div className="p-6 border-b border-border/60 flex items-center justify-between">
+            <h3 className="text-base font-semibold">Atividade Recente (Finder)</h3>
+            <Link href="/admin/finder" className="text-sm font-medium text-primary hover:underline transition-all">
+              Ver todos
+            </Link>
+          </div>
+          <div className="flex flex-col">
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity, idx) => (
+                <div key={activity.id} className={`p-6 flex items-center justify-between hover:bg-muted/40 transition-colors ${idx !== recentActivity.length - 1 ? 'border-b border-border/60' : ''}`}>
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 rounded-xl bg-muted text-muted-foreground">
+                      <Clock size={16} />
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="text-sm font-medium text-foreground">{activity.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(activity.created_at).toLocaleDateString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-sm">
+                    {activity.status === 'completed' 
+                      ? <span className="text-green-600 font-medium px-3 py-1 bg-green-500/10 rounded-full text-xs">Concluído</span>
+                      : <span className="text-blue-600 font-medium px-3 py-1 bg-blue-500/10 rounded-full text-xs">Em andamento</span>
+                    }
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-12 flex flex-col items-center justify-center text-center text-muted-foreground">
+                <Search size={32} className="opacity-20 mb-4" />
+                <p className="text-sm font-medium">Nenhuma atividade recente.</p>
+                <p className="text-xs mt-1">Inicie um novo garimpo para ver os dados aqui.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Lado Direito: Saúde do Sistema (Menor) */}
+        <div className="lg:col-span-4 rounded-2xl border border-border/60 bg-card shadow-sm flex flex-col">
+          <div className="p-6 border-b border-border/60">
+            <h3 className="text-base font-semibold">Saúde do Sistema</h3>
+          </div>
+          <div className="p-6 flex flex-col gap-6">
+            
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={16} className="text-green-500" />
+                  <span className="text-sm font-medium text-foreground">Supabase Auth</span>
+                </div>
+                <span className="text-xs font-medium text-green-500">Operacional</span>
+              </div>
+              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 w-full rounded-full"></div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap size={16} className="text-green-500" />
+                  <span className="text-sm font-medium text-foreground">Motor de IA (Gemini)</span>
+                </div>
+                <span className="text-xs font-medium text-green-500">Operacional</span>
+              </div>
+              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 w-full rounded-full"></div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Server size={16} className="text-yellow-500" />
+                  <span className="text-sm font-medium text-foreground">Apify Scraper</span>
+                </div>
+                <span className="text-xs font-medium text-yellow-600">Carga Alta</span>
+              </div>
+              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-yellow-500 w-[85%] rounded-full"></div>
+              </div>
+            </div>
+
+          </div>
+          
+          <div className="p-6 border-t border-border/60 bg-muted/20 mt-auto">
+            <Link href="/admin/infra/status" className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Rodar Diagnóstico Completo <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+
+      </section>
     </div>
-  )
+  );
 }

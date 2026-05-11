@@ -1,3 +1,4 @@
+// src/app/(dashboard)/admin/lab/ativacao/page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -20,29 +21,34 @@ export default function ActivationsPage() {
     load();
   }, []);
 
-  if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-primary" size={32} /></div>;
 
   return (
-    <div className="flex-1 space-y-8 p-8 bg-[#f8fafc]">
-      <div className="flex items-end justify-between">
+    <div className="flex flex-col gap-6 p-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-black text-[#0f172a] tracking-tight">Ativação de Contas</h2>
-          <p className="text-gray-500 font-medium mt-1">Converta laboratórios de teste em ambientes de produção cliente.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Ativação de Contas</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Converta laboratórios de teste em ambientes de produção cliente.
+          </p>
         </div>
-        <Link href="/admin/lab/previews" className="flex items-center gap-2 text-xs font-bold text-[#5CA3FF] hover:underline uppercase tracking-widest bg-white px-6 py-3 rounded-full border border-gray-100 shadow-sm transition-all">
-          Ver Instâncias <ArrowRight size={14} />
+        <Link 
+          href="/admin/lab/previews" 
+          className="inline-flex items-center justify-center gap-2 h-11 rounded-xl px-4 border border-border/60 bg-card hover:bg-muted/40 transition-all duration-200 ease-in-out text-sm font-medium shadow-sm"
+        >
+          Ver Instâncias <ArrowRight size={16} />
         </Link>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <StatCard label="Aguardando" value={stats.pending} icon={Clock} color="text-amber-500" bg="bg-amber-50" />
-        <StatCard label="Clientes Ativos" value={stats.active} icon={CheckCircle2} color="text-emerald-500" bg="bg-emerald-50" />
-        <StatCard label="Conversão" value={`${stats.conversion}%`} icon={Zap} color="text-blue-500" bg="bg-blue-50" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard label="Aguardando" value={stats.pending} icon={Clock} />
+        <StatCard label="Clientes Ativos" value={stats.active} icon={CheckCircle2} />
+        <StatCard label="Conversão" value={`${stats.conversion}%`} icon={Zap} />
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-50">
-          <h3 className="text-lg font-bold text-[#0f172a]">Fila de Ativação</h3>
+      <div className="rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-border/60">
+          <h3 className="text-lg font-medium">Fila de Ativação</h3>
         </div>
         <ActivationTable />
       </div>
@@ -50,16 +56,16 @@ export default function ActivationsPage() {
   );
 }
 
-function StatCard({ label, value, icon: Icon, color, bg }: any) {
+function StatCard({ label, value, icon: Icon }: any) {
   return (
-    <Card className="border-none shadow-sm rounded-3xl overflow-hidden bg-white">
-      <CardContent className="p-6 flex items-center gap-6">
-        <div className={`p-4 rounded-2xl ${bg} ${color}`}>
+    <Card className="rounded-2xl border border-border/60 bg-card shadow-sm p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <CardContent className="p-0 flex items-center gap-4">
+        <div className="p-4 rounded-xl bg-muted/40 text-primary">
           <Icon size={24} />
         </div>
-        <div>
-          <p className="text-[11px] font-black text-gray-400 uppercase tracking-wider">{label}</p>
-          <p className="text-3xl font-black text-[#0f172a]">{value}</p>
+        <div className="flex flex-col">
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          <p className="text-2xl font-semibold tracking-tight">{value}</p>
         </div>
       </CardContent>
     </Card>

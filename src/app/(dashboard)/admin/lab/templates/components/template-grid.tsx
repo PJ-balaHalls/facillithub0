@@ -5,7 +5,6 @@ import { TemplateCard } from "./template-card";
 import { getTemplates } from "../../actions/templates";
 import { Loader2 } from "lucide-react";
 
-// Tipagem exata baseada na sua tabela lab_templates
 export type TemplateBase = {
   id: string;
   name: string;
@@ -34,22 +33,22 @@ export function TemplateGrid() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-12 text-muted-foreground w-full">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="flex items-center justify-center p-6 text-muted-foreground w-full h-40">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (templates.length === 0) {
     return (
-      <div className="p-12 text-center border border-dashed rounded-lg text-muted-foreground bg-muted/20 w-full">
+      <div className="flex items-center justify-center p-6 text-center rounded-2xl border border-border/60 bg-muted/40 text-sm text-muted-foreground w-full h-40">
         Nenhum template base cadastrado. Clique em "Adicionar Template" para começar.
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
       {templates.map((template) => (
         <TemplateCard key={template.id} template={template} />
       ))}
