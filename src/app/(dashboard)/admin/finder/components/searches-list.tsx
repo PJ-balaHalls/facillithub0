@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import Link from "next/link"
 import {
   Search, CheckCircle2, Clock, AlertCircle, Loader2,
-  RefreshCw, Cpu, Trash2, ArrowRight, Target, Users
+  RefreshCw, Cpu, Trash2, ArrowRight, Target, Users, MapPin
 } from "lucide-react"
 import { syncSearchStatus, processSearch, deleteSearch } from "../actions"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"

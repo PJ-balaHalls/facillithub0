@@ -112,18 +112,18 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
   return (
     <TooltipProvider delayDuration={0}>
       
-      {/* CAMADA 1: VÉU DE DESFOQUE NO FUNDO (z-30 para ficar abaixo da Topbar) */}
+      {/* CAMADA 1: VÉU DE DESFOQUE NO FUNDO (z-40 para ficar abaixo da Sidebar no mobile) */}
       <div 
-        className={`fixed inset-0 z-30 bg-black/5 backdrop-blur-[3px] transition-all duration-500 ease-in-out ${
+        className={`fixed inset-0 z-40 bg-black/5 backdrop-blur-[3px] transition-all duration-500 ease-in-out md:hidden ${
           isExpanded ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={toggleSidebar}
       />
 
-      {/* CAMADA 2: A GAVETA DE VIDRO FLUTUANTE (z-40 para respeitar a Topbar z-50) */}
+      {/* CAMADA 2: A GAVETA DE VIDRO FLUTUANTE (z-50 para ficar na frente de tudo no mobile) */}
       <Sidebar 
         collapsible="none" 
-        className={`fixed z-40 top-5 left-5 h-[calc(100vh-40px)] w-[280px] rounded-3xl bg-white/70 backdrop-blur-3xl border border-white/60 shadow-[0_20px_40px_rgb(0,0,0,0.08)] overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+        className={`fixed z-50 top-0 left-0 h-full w-[280px] rounded-none md:top-5 md:left-5 md:h-[calc(100vh-40px)] md:rounded-3xl bg-white/95 md:bg-white/70 backdrop-blur-3xl border-r md:border border-white/60 shadow-[0_20px_40px_rgb(0,0,0,0.08)] overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
           isExpanded ? "translate-x-0" : "-translate-x-[150%]"
         }`} 
         {...props}
@@ -162,7 +162,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                           return (
                             <SidebarMenuSubItem key={item.title}>
                               <SidebarMenuSubButton asChild>
-                                <Link href={item.url} className={`text-[13px] transition-all rounded-lg py-2 px-3 ${isActive ? "text-[#5CA3FF] font-medium bg-blue-50/50 shadow-sm border border-blue-100/50" : "text-gray-600 font-light hover:text-black hover:bg-white/60"}`}>
+                                <Link href={item.url} onClick={() => { if(window.innerWidth < 768) toggleSidebar() }} className={`text-[13px] transition-all rounded-lg py-2 px-3 ${isActive ? "text-[#5CA3FF] font-medium bg-blue-50/50 shadow-sm border border-blue-100/50" : "text-gray-600 font-light hover:text-black hover:bg-white/60"}`}>
                                   <span>{item.title}</span>
                                 </Link>
                               </SidebarMenuSubButton>
